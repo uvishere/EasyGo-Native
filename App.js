@@ -1,5 +1,5 @@
 /**
- * Sample React Native App
+ * Easy Go Main Landing Page
  * https://github.com/facebook/react-native
  *
  * @format
