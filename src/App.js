@@ -1,16 +1,17 @@
-//Application's Major Entry Point
+'use strict'
+/**
+ * Application's Major Entry Point
+ * @format
+ * @flow
+ */
 
-import {  Navigation } from  'react-native-navigation'
-import { registerScreens } from './Navigation/ScreenCollection'
+import React, {Component} from 'react';
+import ScreenCollection from './Navigation/ScreenCollection';
 
-registerScreens();
-
-Navigation.events().registerAppLaunchedListener(() => {
-    Navigation.setRoot({
-        root: {
-            component: {
-                name: 'Initializing'
-            }
-        }
-    })
-})
+export default class App extends Component {
+    render() {
+        return(
+            <ScreenCollection />
+        );
+    };
+};
