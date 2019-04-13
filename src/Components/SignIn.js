@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView
 } from "react-native";
 import { Input, Button, Icon } from "react-native-elements";
+import { Actions } from "react-native-router-flux";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -52,6 +53,7 @@ export default class LoginScreen extends Component {
     this.selectCategory = this.selectCategory.bind(this);
     this.login = this.login.bind(this);
     this.signUp = this.signUp.bind(this);
+    this.ShowMap = this.ShowMap.bind(this);
   }
 
   async componentDidMount() {
@@ -102,6 +104,10 @@ export default class LoginScreen extends Component {
     }, 1500);
   }
 
+  ShowMap() {
+    return Actions.map()
+  }
+
   render() {
     const {
       name,
@@ -134,6 +140,10 @@ export default class LoginScreen extends Component {
                   </View>
                 </View>
                 <View style={{ flexDirection: "row" }}>
+                  <Button 
+                    title={"Launch Map"}
+                    onPress={() => this.ShowMap()}
+                  />
                   <Button
                     disabled={isLoading}
                     type="clear"
