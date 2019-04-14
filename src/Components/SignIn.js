@@ -23,7 +23,7 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 
 // Login Page Background Image
-const BG_IMAGE = require("../../assets/images/login_bg_screen.jpg");
+const BG_IMAGE = require("../../assets/images/eg-login-bg.jpg");
 
 
 // Enable LayoutAnimation on Android
@@ -388,7 +388,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 70,
     borderBottomWidth: 70,
     borderColor: "white",
-    backgroundColor: "white"
+    backgroundColor: "white",
+    opacity: 0.8,
   },
   loginContainer: {
     alignItems: "center",
@@ -416,7 +417,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingTop: 32,
     paddingBottom: 32,
-    alignItems: "center"
+    alignItems: "center",
+    opacity: 0.8
   },
   loginText: {
     fontSize: 16,
