@@ -1,3 +1,6 @@
+"use strict";
+
+
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import {
@@ -13,14 +16,20 @@ import {
 import { Input, Button, Icon } from "react-native-elements";
 import { Actions } from "react-native-router-flux";
 
+
+// Get the device screen Height and Width
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
+
+// Login Page Background Image
 const BG_IMAGE = require("../../assets/images/login_bg_screen.jpg");
+
 
 // Enable LayoutAnimation on Android
 UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
+
 
 const TabSelector = ({ selected }) => {
   return (
@@ -30,9 +39,11 @@ const TabSelector = ({ selected }) => {
   );
 };
 
+
 TabSelector.propTypes = {
   selected: PropTypes.bool.isRequired
 };
+
 
 export default class LoginScreen extends Component {
   constructor(props) {
@@ -56,9 +67,11 @@ export default class LoginScreen extends Component {
     this.ShowMap = this.ShowMap.bind(this);
   }
 
+
   async componentDidMount() {
     this.setState({ fontLoaded: true });
   }
+
 
   selectCategory(selectedCategory) {
     LayoutAnimation.easeInEaseOut();
@@ -68,12 +81,16 @@ export default class LoginScreen extends Component {
     });
   }
 
+
+  // Email Validation
   validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     return re.test(email);
   }
 
+
+  // Login using email and password and redirect to the map page
   login() {
     const { email, password } = this.state;
     this.setState({ isLoading: true });
@@ -85,9 +102,11 @@ export default class LoginScreen extends Component {
         isEmailValid: this.validateEmail(email) || this.emailInput.shake(),
         isPasswordValid: password.length >= 8 || this.passwordInput.shake()
       });
-    }, 1500);
+    }, 1000);
   }
 
+
+  // Signup using name, email and password and redirect to the map page
   signUp() {
     const { name, email, password, passwordConfirmation } = this.state;
     this.setState({ isLoading: true });
@@ -101,13 +120,19 @@ export default class LoginScreen extends Component {
         isConfirmationValid:
           password === passwordConfirmation || this.confirmationInput.shake()
       });
-    }, 1500);
+    }, 1000);
   }
 
+  
+/* Navigation Functions */
+
+  // Navigation function to display map
   ShowMap() {
     return Actions.map()
   }
 
+
+  // Main Render
   render() {
     const {
       name,
@@ -318,7 +343,7 @@ export default class LoginScreen extends Component {
                     loading={isLoading}
                     disabled={isLoading}
                   />
-                </View>
+              </View>
               </KeyboardAvoidingView>
               <View style={styles.helpContainer}>
                 <Button
@@ -339,6 +364,8 @@ export default class LoginScreen extends Component {
   }
 }
 
+
+// Style Definitions
 const styles = StyleSheet.create({
   container: {
     flex: 1
