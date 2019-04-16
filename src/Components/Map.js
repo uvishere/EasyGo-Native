@@ -26,7 +26,10 @@ export default class ShowMap extends Component {
       search: ""
     };
     this.requestPermission = this.requestPermission.bind(this);
+    this.setLocationPermission = this.setLocationPermission.bind((this));
   }
+
+
 
   // Request permission to access location
   requestPermission = () => {
@@ -41,6 +44,18 @@ export default class ShowMap extends Component {
     });
   };
 
+  setLocationPermission = () => {
+    Permissions.check("location").then(response => {
+      // Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
+      console.log("Location Permission Response: " + response);
+      response != "authorized"
+        ? this.requestPermission()
+        : this.setState({ showlocation: true });
+      this.setState({ locationPermission: response });
+    });
+  }
+
+
   //Update Search
   updateSearch = value => {
     this.setState({ search: value });
@@ -52,30 +67,29 @@ export default class ShowMap extends Component {
 
   componentDidMount() {
     console.log("ShowMap Component Mounted");
-    Permissions.check("location").then(response => {
-      // Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-      console.log("Location Permission Response: " + response);
-      response != "authorized"
-        ? this.requestPermission()
-        : this.setState({ showlocation: true });
-      this.setState({ locationPermission: response });
-    });
+
+    this.setLocationPermission();
+    
   }
 
   //Rendering Main Component
-  render() {
+  render () {
+    
+    // Extract the state variables
     const { search, showLocation, styleURL } = this.state;
+
 
     return (
       <View style={styles.container}>
         <SearchBar
           platform="android"
-          placeholder="Where are you going..."
+          placeholder="Where are you going today..."
           onChangeText={this.updateSearch}
           value={search}
           containerStyle={styles.searchContainer}
-          showLoading={false}
+          Con
         />
+
         <MapboxGL.MapView
           showUserLocation={showLocation}
           zoomLevel={16}
@@ -84,6 +98,7 @@ export default class ShowMap extends Component {
           centerCoordinate={this.state.coords}
           style={styles.container}
         />
+
         <View style={styles.gpsButton}>
           <Icon
             raised
@@ -92,7 +107,7 @@ export default class ShowMap extends Component {
             type="ionicon"
             color="#4150E8"
             size={30}
-            onPress={() => console.log("Add Barrier icon pressed")}
+            onPress={() => this.requestPermission()}
           />
           <Icon
             raised
@@ -123,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   searchContainer: {
-    backgroundColor: "transparent",
-    padding: 10
+    backgroundColor: "#fff",
+    borderBottomColor: "#ddd",
   }
 });
