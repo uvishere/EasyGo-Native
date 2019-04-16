@@ -7,7 +7,7 @@ import React, { Component } from "react";
 import { View, StyleSheet } from "react-native";
 import { Router, Scene, Stack } from "react-native-router-flux";
 import LoginScreen from '../Components/SignIn';
-import ShowMap from "../Components/Home";
+import ShowMap from "../Components/Map";
 
 
 export default class ScreenCollection extends Component {
@@ -25,7 +25,7 @@ export default class ScreenCollection extends Component {
             key="map"
             component={ShowMap}
             title="Map"
-            hideNavBar={false}
+            hideNavBar={true}
           />
         </Stack>
       </Router>

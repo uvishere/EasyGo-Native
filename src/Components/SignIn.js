@@ -166,6 +166,13 @@ export default class LoginScreen extends Component {
                 </View>
                 <View style={{ flexDirection: "row" }}>
                   <Button 
+                    disabled={isLoading}
+                    type="clear"
+                    activeOpacity={0.5}
+                    titleStyle={[
+                      styles.categoryText,
+                      isSignUpPage && styles.selectedCategoryText
+                    ]}
                     title={"Launch Map"}
                     onPress={() => this.ShowMap()}
                   />
@@ -222,8 +229,8 @@ export default class LoginScreen extends Component {
                         borderBottomColor: "rgba(0, 0, 0, 0.38)"
                       }}
                       ref={input => (this.emailInput = input)}
-                      onSubmitEditing={() => this.passwordInput.focus()}
-                      onChangeText={email => this.setState({ email })}
+                      onSubmitEditing={() => this.emailInput.focus()}
+                      onChangeText={name => this.setState({ name })}
                       errorMessage={
                         isEmailValid
                           ? null
