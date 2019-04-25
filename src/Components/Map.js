@@ -11,16 +11,18 @@ import {
   ToastAndroid
 } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
-import Permissions from "react-native-permissions";
 import { Icon, SearchBar } from "react-native-elements";
-import Radar from "react-native-radar";
 import Modal from "react-native-modal";
+import { MaterialDialog } from 'react-native-material-dialog';
+
 
 // Define Mapbox Token
 const MAPBOX_ACCESS_TOKEN =  "pk.eyJ1IjoidXZpc2hlcmUiLCJhIjoiY2pleHBjOWtjMTZidTJ3bWoza3dlZmIxZiJ9.HvLEBmq44mUfdgT7-C73Jg";
 
+
 // Add Mapbox Token to Mapbox Library
 MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
+
 
 export default class ShowMap extends Component {
   constructor(props) {
@@ -31,58 +33,30 @@ export default class ShowMap extends Component {
       styleURL: "mapbox://styles/uvishere/cjgz9ao04000f2snu34b9j4jj",
       locationPermission: "undetermined",
       showLocation: false,
+      centerCoords: [120,86, -12.37],
       longitude: 130.8694928,
       latitude: -12.3713568,
       search: "",
       modalVisible: false
     };
 
+
     //Bind the component functions
-    this.getLocationPermission = this.getLocationPermission.bind(this);
-    // this.setLocationPermission = this.setLocationPermission.bind(this);
-    this.updateLocation = this.updateLocation.bind(this);
+    // this.updateLocation = this.updateLocation.bind(this);
     this.askLocation = this.askLocation.bind(this);
+    this._toggleModal = this._toggleModal.bind(this);
   }
 
-  // Request permission to access location
-  getLocationPermission = () => {
-    Radar.getPermissionsStatus()
-      .then(status => {
-        // do something with status
-        console.log("Location permission from radar", status);
-
-        // Request for location Peromission
-        if (status !== "GRANTED") {
-          Radar.requestPermissions(true)
-        }
-      })
-      .then(res => this.updateLocation())
-      .catch(e => {
-        console.log(e);
-      });
-  };
-
-  //Update Location
-  updateLocation = () => {
-    Radar.trackOnce()
-      .then(result => {
-        // do something with result.location, result.events, result.user.geofences
-        console.log("Radar location: ", result);
-        this.setState({
-          longitude: result.location.longitude,
-          latitude: result.location.latitude
-        });
-      })
-      .catch(err => {
-        // optionally, do something with err
-        console.log(err);
-      });
-  };
-
+  
+  
+  // Ask for Location Permission **USES MAPBOX API
   askLocation = async () => {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     if (isGranted) {
-      this.setState({ showLocation: isGranted });
+      const centervalue = await this._map.getCenter()
+      console.log("location")
+      console.log("MyLocation", centervalue)
+      this.setState({ showLocation: isGranted, centerCoords: centervalue });
     }
     else {
       ToastAndroid.showWithGravity('Location access Denied!! :(', ToastAndroid.SHORT, ToastAndroid.CENTER )
@@ -97,6 +71,7 @@ export default class ShowMap extends Component {
 
   //set the visibility of Barrier Modal
   _toggleModal = () => {
+    console.log("is Modal Visible?", this.state.modalVisible)
     this.setState({ modalVisible: !this.state.modalVisible }); 
   }
 
@@ -107,7 +82,7 @@ export default class ShowMap extends Component {
 
   async componentDidMount() {
     console.log("ShowMap Component Mounted");
-
+    console.log("is Modal Visible?", this.state.modalVisible)
     // this.getLocationPermission();
     // this.updateLocation();
   }
@@ -115,21 +90,14 @@ export default class ShowMap extends Component {
   //Rendering Main Component
   render() {
     // Extract the state variables
-    const { search, longitude, latitude, showLocation, styleURL } = this.state;
+    const { centerCoords , search, longitude, latitude, showLocation, styleURL } = this.state;
     const coords = [longitude, latitude];
-    console.log(coords);
-
+  
     return (
+     
+      
       <View style={styles.container}>
         <View>
-        <Modal isVisible={this.state.modalVisible}>
-          <View style={{ flex: 1, backgroundColor:"#ddd" }}>
-            <Text>Hello!</Text>
-            <TouchableOpacity onPress={this._toggleModal}>
-              <Text>Hide me!</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
       </View>
         <SearchBar
           platform="android"
@@ -144,8 +112,10 @@ export default class ShowMap extends Component {
           zoomLevel={16}
           userTrackingMode={MapboxGL.UserTrackingModes.Follow}
           styleURL={styleURL}
-          centerCoordinate={coords}
+          centerCoordinate={centerCoords}
           style={styles.container}
+          ref={c => this._map = c}
+          onRegionDidChange = {this.onRegionDidChange}
         />
 
         <View style={styles.gpsButton}>
@@ -156,7 +126,7 @@ export default class ShowMap extends Component {
             type="ionicon"
             color="#4150E8"
             size={30}
-            onPress={() => this._toggleModal}
+            onPress={() => this._toggleModal()}
           />
           <Icon
             raised
@@ -168,6 +138,18 @@ export default class ShowMap extends Component {
             onPress={() => this.askLocation()}
           />
         </View>
+         
+        <MaterialDialog
+          title="Use Google's Location Service?"
+          visible={this.state.modalVisible}
+          onOk={() => this.setState({ modalVisible: false })}
+          onCancel={() => this.setState({ modalVisible: false })}>
+          <Text style={styles.dialogText}>
+            Let Google help apps determine location. This means sending anonymous
+            location data to Google, even when no apps are running.
+          </Text>
+        </MaterialDialog>
+
       </View>
     );
   }
@@ -192,5 +174,8 @@ const styles = StyleSheet.create({
   },
   inputBox: {
     fontSize: 5
+  },
+  dialogText: {
+    flex:1
   }
 });

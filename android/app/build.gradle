@@ -138,7 +138,6 @@ android {
 }
 
 dependencies {
-    implementation project(':react-native-radar')
     implementation project(':appcenter-crashes')
     implementation project(':appcenter-analytics')
     implementation project(':appcenter')
