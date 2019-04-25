@@ -66,3 +66,6 @@ buck-out/
 
 # Optional eslint cache
 .eslintcache
+
+#Vscode settings
+.vscode
