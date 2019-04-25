@@ -57,6 +57,7 @@ buck-out/
 
 # dotenv environment variables file
 .env
+env.json
 
 # Output of 'npm pack'
 *.tgz
