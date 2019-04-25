@@ -176,6 +176,6 @@ const styles = StyleSheet.create({
     fontSize: 5
   },
   dialogText: {
-    flex:1
+    fontSize:12
   }
 });
