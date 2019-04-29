@@ -1,9 +1,9 @@
 "use strict";
 
 import React, { Component } from "react";
-import { View, StyleSheet, Text, ToastAndroid } from "react-native";
+import { View, StyleSheet, ToastAndroid } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
-import { Icon, SearchBar } from "react-native-elements";
+import { Icon, SearchBar, Input, Text, Rating } from "react-native-elements";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
 import { Actions } from "react-native-router-flux";
@@ -23,7 +23,7 @@ export default class ShowMap extends Component {
       styleURL: "mapbox://styles/uvishere/cjgz9ao04000f2snu34b9j4jj",
       locationPermission: "undetermined",
       showLocation: false,
-      centerCoords:[0,0],
+      centerCoords: [0, 0],
       longitude: 130.8694928,
       latitude: -12.3713568,
       search: "",
@@ -131,15 +131,36 @@ export default class ShowMap extends Component {
         </View>
 
         <MaterialDialog
-          title="Use Google's Location Service?"
+          title="Add a New Barrier"
           visible={this.state.modalVisible}
           onOk={() => this.setState({ modalVisible: false })}
           onCancel={() => this.setState({ modalVisible: false })}
         >
-          <Text style={styles.dialogText}>
-            Let Google help apps determine location. This means sending
-            anonymous location data to Google, even when no apps are running.
-          </Text>
+          <View>
+            <Text>Barrier Type</Text>
+            <Input
+              placeholder="Barrier Type, should be list"
+              shake={true}
+            />
+            <Text>Co-Ordinates</Text>
+            
+            <Input
+              placeholder="Co ordinates"
+            />
+            <Text>Description</Text>
+            <Input
+              placeholder="Barrier Description"
+            />
+            <Text>Image</Text>
+            <Input
+              placeholder="Open Camera"
+            />
+            <Text>Rating</Text>
+            <Rating
+              style={{ paddingVertical: 10 }}
+              showRating
+            />
+          </View>
         </MaterialDialog>
       </View>
     );
