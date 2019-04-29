@@ -1,23 +1,14 @@
 "use strict";
 
 import React, { Component } from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  Alert,
-  TouchableOpacity,
-  ToastAndroid
-} from "react-native";
+import { View, StyleSheet, Text, ToastAndroid } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import { Icon, SearchBar } from "react-native-elements";
-import Modal from "react-native-modal";
 import { MaterialDialog } from "react-native-material-dialog";
-import config from '../Utils/config'
+import config from "../Utils/config";
 
 // Define Mapbox Token
-const MAPBOX_ACCESS_TOKEN = config.getMapboxKey()
+const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
 
 // Add Mapbox Token to Mapbox Library
 MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -31,7 +22,7 @@ export default class ShowMap extends Component {
       styleURL: "mapbox://styles/uvishere/cjgz9ao04000f2snu34b9j4jj",
       locationPermission: "undetermined",
       showLocation: false,
-      centerCoords: [120, 86, -12.37],
+      centerCoords:[0,0],
       longitude: 130.8694928,
       latitude: -12.3713568,
       search: "",
@@ -49,7 +40,6 @@ export default class ShowMap extends Component {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     if (isGranted) {
       const centervalue = await this._map.getCenter();
-      console.log("location");
       console.log("MyLocation", centervalue);
       this.setState({ showLocation: isGranted, centerCoords: centervalue });
     } else {
@@ -95,7 +85,6 @@ export default class ShowMap extends Component {
       showLocation,
       styleURL
     } = this.state;
-    const coords = [longitude, latitude];
 
     return (
       <View style={styles.container}>
@@ -113,7 +102,7 @@ export default class ShowMap extends Component {
           zoomLevel={16}
           userTrackingMode={MapboxGL.UserTrackingModes.Follow}
           styleURL={styleURL}
-          centerCoordinate={centerCoords}
+          centerCoordinate={this.state.centerCoords}
           style={styles.container}
           ref={c => (this._map = c)}
           onRegionDidChange={this.onRegionDidChange}
