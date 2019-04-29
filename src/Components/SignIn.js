@@ -16,6 +16,7 @@ import {
 import { Input, Button, Icon } from "react-native-elements";
 import { Actions } from "react-native-router-flux";
 import axios from 'axios';
+import AsyncStorage from '@react-native-community/async-storage';
 
 // Get the device screen Height and Width
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -69,6 +70,7 @@ export default class LoginScreen extends Component {
     };
 
     this.selectCategory = this.selectCategory.bind(this);
+    this.setToken = this.setToken.bind(this);
     this.login = this.login.bind(this);
     this.signUp = this.signUp.bind(this);
     this.ShowMap = this.ShowMap.bind(this);
@@ -88,7 +90,6 @@ export default class LoginScreen extends Component {
     });
   }
 
-
   // Email Validation
   validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -96,16 +97,44 @@ export default class LoginScreen extends Component {
     return re.test(email);
   }
 
+  // Navigation function to display map
+  ShowMap(params) {
+    return Actions.map(params)
+  }
+
+  //Store the token into AsyncStorage
+  async setToken(token) {
+    try {
+      console.log('you are here')
+      await AsyncStorage.setItem('@userToken', token);
+      console.log("Key Stored Successfully as UserToken:", token)
+    } catch (err) {
+      console.log("error in setting AsyncStorage key", err);
+    }
+  }
 
   // Login using email and password and redirect to the map page
-  login() {
+  async login() {
     const { email, password } = this.state;
     this.setState({ isLoading: true });
     // Simulate an API call
+
+    //Create the Payload
+    const userPayload = { email, password };
+
+    try {
+      console.log('You are about to call login api');
+      const userResponse = await axios.post(LOGIN_API, userPayload, config);
+      this.setToken(userResponse.data.token)
+      
+      this.ShowMap(userResponse.data.verifiedUser);
+
+    } catch (err) {
+      console.log(err.e)
+    }
     
 
-    
-
+    //Use it later
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
@@ -121,36 +150,31 @@ export default class LoginScreen extends Component {
   async signUp() {
     const { name, email, password, passwordConfirmation } = this.state;
     this.setState({ isLoading: true });
-    
+
     // Simulate an API call
-    const userPayload = { name, email, password };    
 
+    //Create the Payload
+    const userPayload = { name, email, password };
+    try {
+      const userResponse = await axios.post(SIGNUP_API, userPayload, config);
+      this.setToken(userResponse.data.token)
+      
+      // Load Map Screen
+      this.ShowMap(userResponse.data.verifiedUser);
 
-    console.log('You are about to call signup api');
-    const userResponse = await axios.post(SIGNUP_API, userPayload, config);
-    console.log(userResponse);
-
-    // Load Map Screen
-    this.ShowMap(userResponse);
+    } catch (err) {
+      console.log(err)
+    }
 
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
         isLoading: false,
         isEmailValid: this.validateEmail(email) || this.emailInput.shake(),
-        isPasswordValid: password.length >= 8 || this.passwordInput.shake(),
-        isConfirmationValid:
-          password === passwordConfirmation || this.confirmationInput.shake()
+        isPasswordValid: password.length >= 8 || this.passwordInput.shake()
+        
       });
     }, 1000);
-  }
-
-
-  /* Navigation Functions */
-
-  // Navigation function to display map
-  ShowMap() {
-    return Actions.map()
   }
 
 
@@ -325,43 +349,6 @@ export default class LoginScreen extends Component {
                         : "Please enter at least 8 characters"
                     }
                   />
-                  {isSignUpPage && (
-                    <Input
-                      icon={
-                        <Icon
-                          name="lock"
-                          type="simple-line-icon"
-                          color="rgba(0, 0, 0, 0.38)"
-                          size={25}
-                          style={{ backgroundColor: "transparent" }}
-                        />
-                      }
-                      value={passwordConfirmation}
-                      secureTextEntry={true}
-                      keyboardAppearance="light"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      keyboardType="default"
-                      returnKeyType={"done"}
-                      blurOnSubmit={true}
-                      containerStyle={{
-                        marginTop: 16,
-                        borderBottomColor: "rgba(0, 0, 0, 0.38)"
-                      }}
-                      inputStyle={{ marginLeft: 10 }}
-                      placeholder={"Confirm password"}
-                      ref={input => (this.confirmationInput = input)}
-                      onSubmitEditing={this.signUp}
-                      onChangeText={passwordConfirmation =>
-                        this.setState({ passwordConfirmation })
-                      }
-                      errorMessage={
-                        isConfirmationValid
-                          ? null
-                          : "Please enter the same password"
-                      }
-                    />
-                  )}
                   <Button
                     buttonStyle={styles.loginButton}
                     containerStyle={{ marginTop: 32, flex: 0 }}
