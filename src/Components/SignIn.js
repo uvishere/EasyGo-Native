@@ -11,7 +11,8 @@ import {
   Dimensions,
   LayoutAnimation,
   UIManager,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ToastAndroid
 } from "react-native";
 import { Input, Button, Icon } from "react-native-elements";
 import { Actions } from "react-native-router-flux";
@@ -99,6 +100,7 @@ export default class LoginScreen extends Component {
 
   // Navigation function to display map
   ShowMap(params) {
+    Actions.pop();
     return Actions.map(params)
   }
 
@@ -130,7 +132,8 @@ export default class LoginScreen extends Component {
       this.ShowMap(userResponse.data.verifiedUser);
 
     } catch (err) {
-      console.log(err.e)
+      ToastAndroid.show("Login Attempt Failed, please try again",ToastAndroid.SHORT)
+      console.log(err)
     }
     
 
@@ -176,7 +179,6 @@ export default class LoginScreen extends Component {
       });
     }, 1000);
   }
-
 
   // Main Render
   render() {

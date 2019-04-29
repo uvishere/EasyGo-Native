@@ -6,6 +6,7 @@ import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import { Icon, SearchBar } from "react-native-elements";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
+import { Actions } from "react-native-router-flux";
 
 // Define Mapbox Token
 const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
