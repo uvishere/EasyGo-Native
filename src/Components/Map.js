@@ -6,7 +6,7 @@ import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import { Icon, SearchBar, Input, Text, Rating } from "react-native-elements";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
-import { Actions } from "react-native-router-flux";
+import RadioForm from 'react-native-simple-radio-button';
 
 // Define Mapbox Token
 const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
@@ -14,6 +14,15 @@ const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
 // Add Mapbox Token to Mapbox Library
 MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
+
+const type_props = [
+  { label: 'toilet', value: 'toilet' },
+  {label: 'parking', value: 'parking'},
+  {label: 'gaps', value: 'gaps'},
+  {label: 'crossings', value: 'crossings'},
+  {label: 'obstructions', value: 'obstructions'},
+  {label: 'pathways', value: 'pathways'},
+]
 export default class ShowMap extends Component {
   constructor(props) {
     super(props);
@@ -27,8 +36,11 @@ export default class ShowMap extends Component {
       longitude: 130.8694928,
       latitude: -12.3713568,
       search: "",
-      modalVisible: false
+      modalVisible: false,
+      typeValue: ""
     };
+
+    
 
     //Bind the component functions
     // this.updateLocation = this.updateLocation.bind(this);
@@ -138,10 +150,7 @@ export default class ShowMap extends Component {
         >
           <View>
             <Text>Barrier Type</Text>
-            <Input
-              placeholder="Barrier Type, should be list"
-              shake={true}
-            />
+            <RadioForm radio_props={type_props} initial={0} onPress={value => {this.setState({typeValue:value})}} />
             <Text>Co-Ordinates</Text>
             
             <Input
