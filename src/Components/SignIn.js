@@ -15,20 +15,28 @@ import {
 } from "react-native";
 import { Input, Button, Icon } from "react-native-elements";
 import { Actions } from "react-native-router-flux";
-
+import axios from 'axios';
 
 // Get the device screen Height and Width
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
+//API Calls
+const SIGNUP_API = "http://easygo.codeshala.com/user";
+const LOGIN_API = "http://easygo.codeshala.com/user/login";
 
 // Login Page Background Image
 const BG_IMAGE = require("../../assets/images/eg-login-bg.jpg");
 
+// Default Axios Configs
+const config = {
+  headers: { 'Content-Type': 'application/json' },
+  responseType: 'json'
+};
+
 
 // Enable LayoutAnimation on Android
-UIManager.setLayoutAnimationEnabledExperimental &&
-  UIManager.setLayoutAnimationEnabledExperimental(true);
+UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
 
 
 const TabSelector = ({ selected }) => {
@@ -38,7 +46,6 @@ const TabSelector = ({ selected }) => {
     </View>
   );
 };
-
 
 TabSelector.propTypes = {
   selected: PropTypes.bool.isRequired
@@ -95,6 +102,10 @@ export default class LoginScreen extends Component {
     const { email, password } = this.state;
     this.setState({ isLoading: true });
     // Simulate an API call
+    
+
+    
+
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
@@ -107,10 +118,21 @@ export default class LoginScreen extends Component {
 
 
   // Signup using name, email and password and redirect to the map page
-  signUp() {
+  async signUp() {
     const { name, email, password, passwordConfirmation } = this.state;
     this.setState({ isLoading: true });
+    
     // Simulate an API call
+    const userPayload = { name, email, password };    
+
+
+    console.log('You are about to call signup api');
+    const userResponse = await axios.post(SIGNUP_API, userPayload, config);
+    console.log(userResponse);
+
+    // Load Map Screen
+    this.ShowMap(userResponse);
+
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
@@ -123,8 +145,8 @@ export default class LoginScreen extends Component {
     }, 1000);
   }
 
-  
-/* Navigation Functions */
+
+  /* Navigation Functions */
 
   // Navigation function to display map
   ShowMap() {
@@ -165,7 +187,7 @@ export default class LoginScreen extends Component {
                   </View>
                 </View>
                 <View style={{ flexDirection: "row" }}>
-                  <Button 
+                  <Button
                     disabled={isLoading}
                     type="clear"
                     activeOpacity={0.5}
@@ -350,7 +372,7 @@ export default class LoginScreen extends Component {
                     loading={isLoading}
                     disabled={isLoading}
                   />
-              </View>
+                </View>
               </KeyboardAvoidingView>
               <View style={styles.helpContainer}>
                 <Button
@@ -363,8 +385,8 @@ export default class LoginScreen extends Component {
               </View>
             </View>
           ) : (
-            <Text>Loading...</Text>
-          )}
+              <Text>Loading...</Text>
+            )}
         </ImageBackground>
       </View>
     );
@@ -461,7 +483,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 20,
     fontFamily: "regular",
-    marginTop:5
+    marginTop: 5
   },
   helpContainer: {
     height: 64,

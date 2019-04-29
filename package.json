@@ -11,6 +11,7 @@
     "appcenter": "1.13.0",
     "appcenter-analytics": "1.13.0",
     "appcenter-crashes": "1.13.0",
+    "axios": "^0.18.0",
     "npm": "^6.9.0",
     "react": "16.8.3",
     "react-native": "0.59.3",
