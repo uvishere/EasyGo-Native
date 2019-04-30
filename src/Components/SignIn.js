@@ -18,7 +18,7 @@ import { Input, Button, Icon } from "react-native-elements";
 import { Actions } from "react-native-router-flux";
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
-
+import BG_IMAGE from "../../assets/images/eg-login-bg.jpg"
 // Get the device screen Height and Width
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -28,7 +28,7 @@ const SIGNUP_API = "http://easygo.codeshala.com/user";
 const LOGIN_API = "http://easygo.codeshala.com/user/login";
 
 // Login Page Background Image
-const BG_IMAGE = require("../../assets/images/eg-login-bg.jpg");
+// const BG_IMAGE = require("../../assets/images/eg-login-bg.jpg");
 
 // Default Axios Configs
 const config = {
@@ -101,7 +101,7 @@ export default class LoginScreen extends Component {
   // Navigation function to display map
   ShowMap(params) {
     Actions.pop();
-    return Actions.map(params)
+    return Actions.replace(map, params);
   }
 
   //Store the token into AsyncStorage
