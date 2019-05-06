@@ -12,4 +12,16 @@ parserOptions:
   sourceType: module
 plugins:
   - react
-rules: {}
+rules: {
+  {
+    "space-before-function-paren": ["error", {
+        "anonymous": "always",
+        "named": "always",
+        "asyncArrow": "always",
+        
+    }],
+    "object-curly-spacing": [2, "always"],
+    "space-in-parens": [2, "always"]
+
+  }
+}

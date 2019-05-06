@@ -3,7 +3,14 @@
 import React, { Component } from "react";
 import { View, StyleSheet, ToastAndroid } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
-import { Icon, SearchBar, Input, Text, Rating, Button } from "react-native-elements";
+import {
+  Icon,
+  SearchBar,
+  Input,
+  Text,
+  Rating,
+  Button
+} from "react-native-elements";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
 import RadioForm from "react-native-simple-radio-button";
@@ -38,7 +45,7 @@ export default class ShowMap extends Component {
       latitude: -12.3713568,
       search: "",
       modalVisible: false,
-      typeValue: "",
+      typeValue: type_props[0].value,
       barrierDesc: "",
       pointBarrierVisible: false,
       featureCollection: MapboxGL.geoUtils.makeFeatureCollection()
@@ -54,35 +61,48 @@ export default class ShowMap extends Component {
   }
 
   // Ask for Location Permission **USES MAPBOX API
-  async askLocation() {
+  async askLocation () {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     if (isGranted) {
-      ToastAndroid.showWithGravity( "Please wait while we update your current location...", ToastAndroid.LONG, ToastAndroid.CENTER);
+      ToastAndroid.showWithGravity(
+        "Please wait while we update your current location...",
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER
+      );
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        position => {
           console.log("position", position);
           const { longitude, latitude } = position.coords;
-          console.log(longitude, latitude)
-          ToastAndroid.showWithGravity( "Thank you, your location has been updated", ToastAndroid.LONG, ToastAndroid.CENTER);
+          console.log(longitude, latitude);
+          ToastAndroid.showWithGravity(
+            "Thank you, your location has been updated",
+            ToastAndroid.LONG,
+            ToastAndroid.CENTER
+          );
           this.setState({
             centerCoords: [longitude, latitude]
           });
         },
-        (error) => { console.log(error) },
-        {enableHighAccuracy:true, timeout:10000, maximumAge: 1},
-      )
+        error => {
+          console.log(error);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 1 }
+      );
       // const position = await this.getCurrentLocation();
 
       // this._map.moveTo(this.state.centerCoords, 200);
       // this.setState({ showLocation: isGranted, centerCoords: centervalue });
     } else {
-      ToastAndroid.showWithGravity( "Location access Denied!! :(", ToastAndroid.SHORT, ToastAndroid.CENTER);
+      ToastAndroid.showWithGravity (
+        "Location access Denied!! :(",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
     }
   }
 
-
   //Update the userlocation
-  async updateUserLocation(location) {
+  async updateUserLocation (location) {
     this.setState({
       timestamp: location.timestamp,
       latitude: location.coords.latitude,
@@ -92,15 +112,15 @@ export default class ShowMap extends Component {
     });
   }
 
-  async onSubmitBarrier() {
+  async onSubmitBarrier () {
     const newGeoPoint = {
-      coordinates: [this.state.longitude,this.state.latitude],
+      coordinates: [this.state.longitude, this.state.latitude],
       type: "Point"
     };
     const properties = {
       feature_type: this.state.typeValue,
       description: this.state.barrierDesc
-    }
+    };
     console.log(newGeoPoint);
     const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
     feature.id = `${Date.now()}`;
@@ -115,40 +135,46 @@ export default class ShowMap extends Component {
       )
     });
   }
- 
+
   //Update Search Input Value
   updateSearch (value) {
     this.setState({ search: value });
-  };
+  }
 
-  
   //Update the Barrier Description Value
-  updateBarrierDesc(value) {
+  updateBarrierDesc (value) {
     this.setState({ barrierDesc: value });
   }
 
   //set the visibility of Barrier Modal
-  _toggleModal = () => {
+  _toggleModal () {
     console.log("is Modal Visible?", this.state.modalVisible);
     this.setState({ modalVisible: !this.state.modalVisible });
-  };
-
-  async componentWillMount() {
-    //Fetch All the Points here
-    this.askLocation();
   }
 
-  async componentDidMount() {
+  async componentWillMount () {
+    //Fetch All the Points here
+    // this.askLocation();
+  }
+
+  async componentDidMount () {
     console.log("ShowMap Component Mounted");
   }
 
-  onSourceLayerPress(e) {
+  onSourceLayerPress (e) {
     const feature = e.nativeEvent.payload;
-    console.log("You've pressed", feature)
-    ToastAndroid.showWithGravity( feature.properties.feature_type+"   "+feature.properties.description, ToastAndroid.SHORT, ToastAndroid.CENTER);    
-  };
+    console.log("You've pressed", feature);
+    ToastAndroid.showWithGravity(
+      "Barrier Type: " +
+      feature.properties.feature_type +
+      "   description: " +
+      feature.properties.description,
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER
+    );
+  }
   //Rendering Main Component
-  render() {
+  render () {
     // Extract the state variables
     const {
       centerCoords,
@@ -158,8 +184,7 @@ export default class ShowMap extends Component {
       showLocation,
       styleURL
     } = this.state;
-    
-    
+
     return (
       <View style={styles.container}>
         <View />
@@ -236,22 +261,25 @@ export default class ShowMap extends Component {
             />
             <Text>Co-Ordinates</Text>
             <Button
-              icon={
-                <Icon
-                  name="add-location"
-                  size={15}
-                  color="white"
-                />
-              }
+              icon={<Icon name="add-location" size={15} color="white" />}
               title="Current Location"
               onPress={this.askLocation}
             />
-            <Text>{longitude}, {latitude}</Text>
+            <Text>
+              {longitude}, {latitude}
+            </Text>
             <Text> Description</Text>
-            <Input onChangeText={this.updateBarrierDesc} placeholder="Barrier Description" />
-            
+            <Input
+              onChangeText={this.updateBarrierDesc}
+              placeholder="Barrier Description"
+            />
+
             <Text>Rating</Text>
-            <Rating style={{ paddingVertical: 10 }} ratingColor={"#000000"} startingValue={0.5} />
+            <Rating
+              style={{ paddingVertical: 10 }}
+              ratingColor={"#000000"}
+              startingValue={0.5}
+            />
           </View>
         </MaterialDialog>
       </View>

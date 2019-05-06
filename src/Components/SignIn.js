@@ -100,8 +100,7 @@ export default class LoginScreen extends Component {
 
   // Navigation function to display map
   ShowMap(params) {
-    Actions.pop();
-    return Actions.replace(map, params);
+    return Actions.replace('map', params);
   }
 
   //Store the token into AsyncStorage
