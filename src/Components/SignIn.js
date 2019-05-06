@@ -15,7 +15,7 @@ import {
   ToastAndroid
 } from "react-native";
 import { Input, Button, Icon } from "react-native-elements";
-import { Actions } from "react-native-router-flux";
+import { Actions, ActionConst } from "react-native-router-flux";
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 import BG_IMAGE from "../../assets/images/eg-login-bg.jpg"
@@ -35,7 +35,6 @@ const config = {
   headers: { 'Content-Type': 'application/json' },
   responseType: 'json'
 };
-
 
 // Enable LayoutAnimation on Android
 UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -100,7 +99,8 @@ export default class LoginScreen extends Component {
 
   // Navigation function to display map
   ShowMap(params) {
-    return Actions.replace('map', params);
+    console.log(ActionConst.RESET)
+    return Actions.reset('map', params);
   }
 
   //Store the token into AsyncStorage

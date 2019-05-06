@@ -39,7 +39,6 @@ export default class ShowMap extends Component {
     this.state = {
       styleURL: "mapbox://styles/uvishere/cjgz9ao04000f2snu34b9j4jj",
       locationPermission: "undetermined",
-      showLocation: false,
       centerCoords: [0, 0],
       longitude: 130.8694928,
       latitude: -12.3713568,
@@ -52,6 +51,7 @@ export default class ShowMap extends Component {
     };
 
     //Bind the component functions
+    this.updateSearch = this.updateSearch.bind(this);
     this.askLocation = this.askLocation.bind(this);
     this._toggleModal = this._toggleModal.bind(this);
     this.onSubmitBarrier = this.onSubmitBarrier.bind(this);
@@ -61,7 +61,7 @@ export default class ShowMap extends Component {
   }
 
   // Ask for Location Permission **USES MAPBOX API
-  async askLocation () {
+  async askLocation() {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     if (isGranted) {
       ToastAndroid.showWithGravity(
@@ -87,22 +87,18 @@ export default class ShowMap extends Component {
           console.log(error);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 1 }
-      );
-      // const position = await this.getCurrentLocation();
-
-      // this._map.moveTo(this.state.centerCoords, 200);
-      // this.setState({ showLocation: isGranted, centerCoords: centervalue });
+      )
     } else {
-      ToastAndroid.showWithGravity (
+      ToastAndroid.showWithGravity(
         "Location access Denied!! :(",
         ToastAndroid.SHORT,
         ToastAndroid.CENTER
-      );
+      )
     }
   }
 
   //Update the userlocation
-  async updateUserLocation (location) {
+  async updateUserLocation(location) {
     this.setState({
       timestamp: location.timestamp,
       latitude: location.coords.latitude,
@@ -112,7 +108,9 @@ export default class ShowMap extends Component {
     });
   }
 
-  async onSubmitBarrier () {
+
+  // handler to function after a barrier is added.
+  async onSubmitBarrier() {
     const newGeoPoint = {
       coordinates: [this.state.longitude, this.state.latitude],
       type: "Point"
@@ -137,31 +135,31 @@ export default class ShowMap extends Component {
   }
 
   //Update Search Input Value
-  updateSearch (value) {
+  updateSearch(value) {
     this.setState({ search: value });
   }
 
   //Update the Barrier Description Value
-  updateBarrierDesc (value) {
+  updateBarrierDesc(value) {
     this.setState({ barrierDesc: value });
   }
 
   //set the visibility of Barrier Modal
-  _toggleModal () {
+  _toggleModal() {
     console.log("is Modal Visible?", this.state.modalVisible);
     this.setState({ modalVisible: !this.state.modalVisible });
   }
 
-  async componentWillMount () {
+  async componentWillMount() {
     //Fetch All the Points here
     // this.askLocation();
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     console.log("ShowMap Component Mounted");
   }
 
-  onSourceLayerPress (e) {
+  onSourceLayerPress(e) {
     const feature = e.nativeEvent.payload;
     console.log("You've pressed", feature);
     ToastAndroid.showWithGravity(
@@ -174,14 +172,13 @@ export default class ShowMap extends Component {
     );
   }
   //Rendering Main Component
-  render () {
+  render() {
     // Extract the state variables
     const {
       centerCoords,
       search,
       longitude,
       latitude,
-      showLocation,
       styleURL
     } = this.state;
 
@@ -197,7 +194,7 @@ export default class ShowMap extends Component {
         />
 
         <MapboxGL.MapView
-          showUserLocation={showLocation}
+          showUserLocation={true}
           zoomLevel={16}
           userTrackingMode={MapboxGL.UserTrackingModes.FollowWithHeading}
           styleURL={styleURL}

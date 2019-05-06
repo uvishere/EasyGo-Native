@@ -51,7 +51,7 @@ export default class ScreenCollection extends Component {
             initial={this.state.isLogin}
             hideNavBar={true}
           />
-          <Scene key="map" initial={this.state.isHome} component={ShowMap} title="Map" hideNavBar={true} />
+          <Scene key="map" initial={this.state.isHome} component={ShowMap} title="Map" hideNavBar={true} back={true} />
         </Stack>
       </Router>
     );
