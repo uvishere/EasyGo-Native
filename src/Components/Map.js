@@ -11,6 +11,7 @@ import {
   Rating,
   Button
 } from "react-native-elements";
+import { Toast } from 'native-base';
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
 import CurrentLocation from './CurrentLocation';
@@ -128,21 +129,19 @@ export default class ShowMap extends Component {
   async askLocation() {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     if (isGranted) {
-      ToastAndroid.showWithGravity(
-        "Please wait while we update your current location...",
-        ToastAndroid.LONG,
-        ToastAndroid.CENTER
-      );
+      Toast.show({
+        text: 'Please Wait! Your location is being updated',
+        type: "warning"
+      });
       navigator.geolocation.getCurrentPosition(
         position => {
           console.log("position", position);
           const { longitude, latitude } = position.coords;
           console.log(longitude, latitude);
-          ToastAndroid.showWithGravity(
-            "Thank you, your location has been updated",
-            ToastAndroid.LONG,
-            ToastAndroid.CENTER
-          );
+          Toast.show({
+            text: 'Your Location has been updated',
+            type: "success"
+          });
           this.setState({
             centerCoords: [longitude, latitude]
           });
@@ -153,11 +152,10 @@ export default class ShowMap extends Component {
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 1 }
       )
     } else {
-      ToastAndroid.showWithGravity(
-        "Location access Denied!! :(",
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER
-      )
+      Toast.show({
+        text: 'Location Timed Out!',
+        type: "error"
+      });
     }
   }
 
@@ -255,6 +253,7 @@ export default class ShowMap extends Component {
           value={this.state.search}
           containerStyle={styles.searchContainer}
           round
+          onPress={this.openSearchModal}
         />
 
         <MapboxGL.MapView
