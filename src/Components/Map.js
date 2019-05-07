@@ -13,6 +13,9 @@ import {
 } from "react-native-elements";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
+import CurrentLocation from './CurrentLocation';
+
+
 import RadioForm from "react-native-simple-radio-button";
 import toiletIcon from "../../assets/images/toilet-icon.png";
 
@@ -41,13 +44,15 @@ export default class ShowMap extends Component {
       locationPermission: "undetermined",
       centerCoords: [0, 0],
       longitude: 130.8694928,
-      latitude: -12.3713568,
+      latitude: -12.3713666,
       search: "",
       modalVisible: false,
       typeValue: type_props[0].value,
       barrierDesc: "",
       pointBarrierVisible: false,
-      featureCollection: MapboxGL.geoUtils.makeFeatureCollection()
+      featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
+      origin: null,
+      fakeCenter: [130.8694928,-12.3714000]
     };
 
     //Bind the component functions
@@ -58,6 +63,12 @@ export default class ShowMap extends Component {
     this.updateUserLocation = this.updateUserLocation.bind(this);
     this.updateBarrierDesc = this.updateBarrierDesc.bind(this);
     this.onSourceLayerPress = this.onSourceLayerPress.bind(this);
+    this.onLocationChange = this.onLocationChange.bind(this);
+
+  }
+
+  onLocationChange (coord) {
+    this.setState({ origin: coord });
   }
 
   // Ask for Location Permission **USES MAPBOX API
@@ -217,6 +228,11 @@ export default class ShowMap extends Component {
               style={mapStyles.icon}
             />
           </MapboxGL.ShapeSource>
+          <CurrentLocation
+            mockUserLocation={this.state.fakeCenter}
+            onLocationChange={this.onLocationChange}
+            {...this.currentLocationStyle} />
+          
         </MapboxGL.MapView>
         <View style={styles.gpsButton}>
           <Icon
