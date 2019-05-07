@@ -1,7 +1,7 @@
 "use strict";
 
 import React, { Component } from "react";
-import { View, StyleSheet, ToastAndroid } from "react-native";
+import { View, StyleSheet, ToastAndroid, PixelRatio, Platform } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import {
   Icon,
@@ -14,7 +14,8 @@ import {
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
 import CurrentLocation from './CurrentLocation';
-
+import Directions from './Directions';
+import bbox from '@turf/bbox';
 
 import RadioForm from "react-native-simple-radio-button";
 import toiletIcon from "../../assets/images/toilet-icon.png";
@@ -34,6 +35,10 @@ const type_props = [
   { label: "pathways", value: "pathways" }
 ];
 
+
+const IS_ANDROID = Platform.OS === 'android';
+const BOUNDS_PADDING_SIDE = IS_ANDROID ? PixelRatio.getPixelSizeForLayoutSize(60) : 60;
+const BOUNDS_PADDING_BOTTOM = IS_ANDROID ? PixelRatio.getPixelSizeForLayoutSize(206) : 206;
 export default class ShowMap extends Component {
   constructor(props) {
     super(props);
@@ -51,8 +56,9 @@ export default class ShowMap extends Component {
       barrierDesc: "",
       pointBarrierVisible: false,
       featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
-      origin: null,
-      fakeCenter: [130.8694928,-12.3714000]
+      origin: [130.851761,-12.375846],
+      destination: [130.852405, -12.376862],
+      fakeCenter: [130.852454,-12.374835]
     };
 
     //Bind the component functions
@@ -64,11 +70,37 @@ export default class ShowMap extends Component {
     this.updateBarrierDesc = this.updateBarrierDesc.bind(this);
     this.onSourceLayerPress = this.onSourceLayerPress.bind(this);
     this.onLocationChange = this.onLocationChange.bind(this);
+    this.onDirectionsFetched = this.onDirectionsFetched.bind(this);
+  }
 
+  onDirectionsFetched (directions) {
+    if (!this.state.isChangeFromPress) {
+      this.fitBounds(directions);
+    }
+  }
+
+  fitBounds (directions) {
+    const boundingBox = bbox(
+      MapboxGL.geoUtils.makeFeature(directions.geometry),
+    );
+
+    const padding = [
+      BOUNDS_PADDING_BOTTOM,
+      BOUNDS_PADDING_SIDE,
+      BOUNDS_PADDING_BOTTOM,
+      BOUNDS_PADDING_SIDE,
+    ];
+    this._map.fitBounds([boundingBox[2], boundingBox[3]], [boundingBox[0], boundingBox[1]], padding, 200);
   }
 
   onLocationChange (coord) {
     this.setState({ origin: coord });
+  }
+
+  get directionsStyle () {
+    return {
+      lineColor: '#987DDF',
+    };
   }
 
   // Ask for Location Permission **USES MAPBOX API
@@ -232,7 +264,12 @@ export default class ShowMap extends Component {
             mockUserLocation={this.state.fakeCenter}
             onLocationChange={this.onLocationChange}
             {...this.currentLocationStyle} />
-          
+          <Directions
+            accessToken={MAPBOX_ACCESS_TOKEN}
+            origin={this.state.origin}
+            destination={this.state.destination}
+            onDirectionsFetched={this.onDirectionsFetched}
+            style={this.directionsStyle} />
         </MapboxGL.MapView>
         <View style={styles.gpsButton}>
           <Icon
