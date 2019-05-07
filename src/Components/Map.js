@@ -16,6 +16,7 @@ import config from "../Utils/config";
 import CurrentLocation from './CurrentLocation';
 import Directions from './Directions';
 import bbox from '@turf/bbox';
+import RNGooglePlaces from 'react-native-google-places';
 
 import RadioForm from "react-native-simple-radio-button";
 import toiletIcon from "../../assets/images/toilet-icon.png";
@@ -47,7 +48,7 @@ export default class ShowMap extends Component {
     this.state = {
       styleURL: "mapbox://styles/uvishere/cjgz9ao04000f2snu34b9j4jj",
       locationPermission: "undetermined",
-      centerCoords: [0, 0],
+      centerCoords: null,
       longitude: 130.8694928,
       latitude: -12.3713666,
       search: "",
@@ -57,7 +58,7 @@ export default class ShowMap extends Component {
       pointBarrierVisible: false,
       featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
       origin: [130.851761,-12.375846],
-      destination: [130.852405, -12.376862],
+      destination: null,
       fakeCenter: [130.852454,-12.374835]
     };
 
@@ -71,7 +72,27 @@ export default class ShowMap extends Component {
     this.onSourceLayerPress = this.onSourceLayerPress.bind(this);
     this.onLocationChange = this.onLocationChange.bind(this);
     this.onDirectionsFetched = this.onDirectionsFetched.bind(this);
+    this.openSearchModal = this.openSearchModal.bind(this);
   }
+
+  //For Location Search Autocomplete
+  openSearchModal() {
+    RNGooglePlaces.openAutocompleteModal({
+      useOverlay: true
+    })
+      .then((place) => {
+        console.log(place.location);
+        const { longitude, latitude } = place.location;
+        const destination = [longitude, latitude]
+        this.setState({
+          destination: destination
+        })
+		// place represents user's selection from the
+		// suggestions and it is a simplified Google Place object.
+    })
+    .catch(error => console.log(error.message));  // error is a Javascript Error object
+  }
+
 
   onDirectionsFetched (directions) {
     if (!this.state.isChangeFromPress) {
@@ -227,13 +248,13 @@ export default class ShowMap extends Component {
 
     return (
       <View style={styles.container}>
-        <View />
         <SearchBar
           platform="android"
           placeholder="Where are you going today..."
-          onChangeText={this.updateSearch}
-          value={search}
+          onChangeText={this.openSearchModal}
+          value={this.state.search}
           containerStyle={styles.searchContainer}
+          round
         />
 
         <MapboxGL.MapView
@@ -264,6 +285,7 @@ export default class ShowMap extends Component {
             mockUserLocation={this.state.fakeCenter}
             onLocationChange={this.onLocationChange}
             {...this.currentLocationStyle} />
+          
           <Directions
             accessToken={MAPBOX_ACCESS_TOKEN}
             origin={this.state.origin}
@@ -352,7 +374,9 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     backgroundColor: "#fff",
-    borderBottomColor: "#ddd"
+    borderBottomColor: "#ddd",
+    padding: 20,
+    borderRadius: 50,
   },
   inputBox: {
     fontSize: 5

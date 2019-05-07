@@ -7,7 +7,7 @@ import MapboxClient from 'mapbox';
 
 const styles = MapboxGL.StyleSheet.create({
     directionsLine: {
-        lineWidth: 3,
+        lineWidth: 5,
         lineCap: MapboxGL.LineCap.Round,
         lineJoin: MapboxGL.LineJoin.Round,
     },
@@ -96,6 +96,7 @@ class Directions extends React.Component {
     }
 
     async fetchDirections(origin, dest) {
+        console.log("Origin: "+origin+"Destination: "+dest)
         if (!origin || !dest || !this.state.mapboxClient) {
             return; 
         }
