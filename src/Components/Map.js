@@ -82,14 +82,18 @@ export default class ShowMap extends Component {
       useOverlay: true
     })
       .then((place) => {
-        console.log(place.location);
+        console.log(place);
+
+        Toast.show({
+          text: "Address: "+place.address,
+          type: "default"
+        });
+
         const { longitude, latitude } = place.location;
-        const destination = [longitude, latitude]
+        const destination = [longitude, latitude];
         this.setState({
           destination: destination
         })
-		// place represents user's selection from the
-		// suggestions and it is a simplified Google Place object.
     })
     .catch(error => console.log(error.message));  // error is a Javascript Error object
   }
@@ -106,13 +110,15 @@ export default class ShowMap extends Component {
       MapboxGL.geoUtils.makeFeature(directions.geometry),
     );
 
+    console.log("Mapbounds",boundingBox)
+
     const padding = [
       BOUNDS_PADDING_BOTTOM,
       BOUNDS_PADDING_SIDE,
       BOUNDS_PADDING_BOTTOM,
       BOUNDS_PADDING_SIDE,
     ];
-    this._map.fitBounds([boundingBox[2], boundingBox[3]], [boundingBox[0], boundingBox[1]], padding, 200);
+    this._map.fitBounds([boundingBox[2], boundingBox[3]], [boundingBox[0], boundingBox[1]], 20, 500);
   }
 
   onLocationChange (coord) {
@@ -148,8 +154,7 @@ export default class ShowMap extends Component {
         },
         error => {
           console.log(error);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 1 }
+        }
       )
     } else {
       Toast.show({
@@ -214,7 +219,7 @@ export default class ShowMap extends Component {
 
   async componentWillMount() {
     //Fetch All the Points here
-    // this.askLocation();
+    this.askLocation();
   }
 
   async componentDidMount() {
@@ -223,15 +228,10 @@ export default class ShowMap extends Component {
 
   onSourceLayerPress(e) {
     const feature = e.nativeEvent.payload;
-    console.log("You've pressed", feature);
-    ToastAndroid.showWithGravity(
-      "Barrier Type: " +
-      feature.properties.feature_type +
-      "   description: " +
-      feature.properties.description,
-      ToastAndroid.SHORT,
-      ToastAndroid.CENTER
-    );
+    Toast.show({
+      text: feature.properties.description,
+      type: "success"
+    });
   }
   //Rendering Main Component
   render() {
@@ -249,7 +249,7 @@ export default class ShowMap extends Component {
         <SearchBar
           platform="android"
           placeholder="Where are you going today..."
-          onChangeText={this.openSearchModal}
+          onChangeText={this.updateSearch}
           value={this.state.search}
           containerStyle={styles.searchContainer}
           round
@@ -292,7 +292,17 @@ export default class ShowMap extends Component {
             onDirectionsFetched={this.onDirectionsFetched}
             style={this.directionsStyle} />
         </MapboxGL.MapView>
+
         <View style={styles.gpsButton}>
+        <Icon
+            raised
+            reverse={true}
+            name="ios-search"
+            type="ionicon"
+            color="#1c9e50"
+            size={30}
+            onPress={() => this.openSearchModal()}
+          />
           <Icon
             raised
             reverse={true}
