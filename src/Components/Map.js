@@ -1,7 +1,7 @@
 "use strict";
 
 import React, { Component } from "react";
-import { View, StyleSheet, ToastAndroid, PixelRatio, Platform } from "react-native";
+import { View, StyleSheet, PixelRatio, Platform } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import {
   Icon,
@@ -11,13 +11,13 @@ import {
   Rating,
   Button
 } from "react-native-elements";
-import { Toast } from 'native-base';
+import { Toast } from "native-base";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
-import CurrentLocation from './CurrentLocation';
-import Directions from './Directions';
-import bbox from '@turf/bbox';
-import RNGooglePlaces from 'react-native-google-places';
+import CurrentLocation from "./CurrentLocation";
+import Directions from "./Directions";
+import bbox from "@turf/bbox";
+import RNGooglePlaces from "react-native-google-places";
 
 import RadioForm from "react-native-simple-radio-button";
 import toiletIcon from "../../assets/images/toilet-icon.png";
@@ -37,10 +37,13 @@ const type_props = [
   { label: "pathways", value: "pathways" }
 ];
 
-
-const IS_ANDROID = Platform.OS === 'android';
-const BOUNDS_PADDING_SIDE = IS_ANDROID ? PixelRatio.getPixelSizeForLayoutSize(60) : 60;
-const BOUNDS_PADDING_BOTTOM = IS_ANDROID ? PixelRatio.getPixelSizeForLayoutSize(206) : 206;
+const IS_ANDROID = Platform.OS === "android";
+const BOUNDS_PADDING_SIDE = IS_ANDROID
+  ? PixelRatio.getPixelSizeForLayoutSize(60)
+  : 60;
+const BOUNDS_PADDING_BOTTOM = IS_ANDROID
+  ? PixelRatio.getPixelSizeForLayoutSize(206)
+  : 206;
 export default class ShowMap extends Component {
   constructor(props) {
     super(props);
@@ -58,9 +61,9 @@ export default class ShowMap extends Component {
       barrierDesc: "",
       pointBarrierVisible: false,
       featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
-      origin: [130.851761,-12.375846],
+      origin: [130.851761, -12.375846],
       destination: null,
-      fakeCenter: [130.852454,-12.374835]
+      fakeCenter: [130.852454, -12.374835]
     };
 
     //Bind the component functions
@@ -81,11 +84,11 @@ export default class ShowMap extends Component {
     RNGooglePlaces.openAutocompleteModal({
       useOverlay: true
     })
-      .then((place) => {
+      .then(place => {
         console.log(place);
 
         Toast.show({
-          text: "Address: "+place.address,
+          text: "Address: " + place.address,
           type: "default"
         });
 
@@ -93,41 +96,40 @@ export default class ShowMap extends Component {
         const destination = [longitude, latitude];
         this.setState({
           destination: destination
-        })
-    })
-    .catch(error => console.log(error.message));  // error is a Javascript Error object
+        });
+      })
+      .catch(error => console.log(error.message)); // error is a Javascript Error object
   }
 
-
-  onDirectionsFetched (directions) {
+  onDirectionsFetched(directions) {
     if (!this.state.isChangeFromPress) {
       this.fitBounds(directions);
     }
   }
 
-  fitBounds (directions) {
+  fitBounds(directions) {
     const boundingBox = bbox(
-      MapboxGL.geoUtils.makeFeature(directions.geometry),
+      MapboxGL.geoUtils.makeFeature(directions.geometry)
     );
 
-    console.log("Mapbounds",boundingBox)
+    console.log("Mapbounds", boundingBox);
 
-    const padding = [
-      BOUNDS_PADDING_BOTTOM,
-      BOUNDS_PADDING_SIDE,
-      BOUNDS_PADDING_BOTTOM,
-      BOUNDS_PADDING_SIDE,
-    ];
-    this._map.fitBounds([boundingBox[2], boundingBox[3]], [boundingBox[0], boundingBox[1]], 20, 500);
+    const padding = 20;
+    this._map.fitBounds(
+      [boundingBox[2], boundingBox[3]],
+      [boundingBox[0], boundingBox[1]],
+      padding,
+      500
+    );
   }
 
-  onLocationChange (coord) {
+  onLocationChange(coord) {
     this.setState({ origin: coord });
   }
 
-  get directionsStyle () {
+  get directionsStyle() {
     return {
-      lineColor: '#987DDF',
+      lineColor: "#987DDF"
     };
   }
 
@@ -136,7 +138,7 @@ export default class ShowMap extends Component {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     if (isGranted) {
       Toast.show({
-        text: 'Please Wait! Your location is being updated',
+        text: "Please Wait! Your location is being updated",
         type: "warning"
       });
       navigator.geolocation.getCurrentPosition(
@@ -145,7 +147,7 @@ export default class ShowMap extends Component {
           const { longitude, latitude } = position.coords;
           console.log(longitude, latitude);
           Toast.show({
-            text: 'Your Location has been updated',
+            text: "Your Location has been updated",
             type: "success"
           });
           this.setState({
@@ -155,10 +157,10 @@ export default class ShowMap extends Component {
         error => {
           console.log(error);
         }
-      )
+      );
     } else {
       Toast.show({
-        text: 'Location Timed Out!',
+        text: "Location Timed Out!",
         type: "error"
       });
     }
@@ -174,7 +176,6 @@ export default class ShowMap extends Component {
       centerCoords: location.centerCoords
     });
   }
-
 
   // handler to function after a barrier is added.
   async onSubmitBarrier() {
@@ -233,16 +234,11 @@ export default class ShowMap extends Component {
       type: "success"
     });
   }
+
   //Rendering Main Component
   render() {
     // Extract the state variables
-    const {
-      centerCoords,
-      search,
-      longitude,
-      latitude,
-      styleURL
-    } = this.state;
+    const { centerCoords, search, longitude, latitude, styleURL } = this.state;
 
     return (
       <View style={styles.container}>
@@ -281,20 +277,21 @@ export default class ShowMap extends Component {
             />
           </MapboxGL.ShapeSource>
           <CurrentLocation
-            mockUserLocation={this.state.fakeCenter}
             onLocationChange={this.onLocationChange}
-            {...this.currentLocationStyle} />
-          
+            {...this.currentLocationStyle}
+          />
+
           <Directions
             accessToken={MAPBOX_ACCESS_TOKEN}
             origin={this.state.origin}
             destination={this.state.destination}
             onDirectionsFetched={this.onDirectionsFetched}
-            style={this.directionsStyle} />
+            style={this.directionsStyle}
+          />
         </MapboxGL.MapView>
 
         <View style={styles.gpsButton}>
-        <Icon
+          <Icon
             raised
             reverse={true}
             name="ios-search"
@@ -385,7 +382,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomColor: "#ddd",
     padding: 20,
-    borderRadius: 50,
+    borderRadius: 50
   },
   inputBox: {
     fontSize: 5
