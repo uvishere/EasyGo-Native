@@ -4,11 +4,15 @@ import MapboxGL from '@mapbox/react-native-mapbox-gl';
 
 const styles = MapboxGL.StyleSheet.create({
   innerCircle: {
-    circleRadius: 8,
+    circleRadius: 6,
+    circleStrokeWidth: 2,
+    circleStrokeColor: 'white',
+    circleColor:'green'
   },
   outerCircle: {
-    circleRadius: 13,
+    circleRadius: 11,
     circleOpacity: 0.40,
+    circleColor:'green'
   },
 });
 

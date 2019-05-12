@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import MapboxGL from '@mapbox/react-native-mapbox-gl';
 import MapboxClient from 'mapbox';
+import DirectionType from "../Utils/DirectionType";
 
 // import Places from './Places';
 
@@ -40,14 +41,18 @@ class Directions extends React.Component {
          * walking, driving, cycling. Defaults to driving
          */
         type: PropTypes.oneOf([
+            'driving-traffic',
             'walking',
+            'cycling',
         ]),
-        // 'mapbox/driving-traffic',
-        // 'mapbox/cycling',
 
         style: PropTypes.object,
     };
-
+    
+    static defaultProps = {
+        type: DirectionType.Cycling,
+    }
+    
     constructor(props) {
         super(props);
 

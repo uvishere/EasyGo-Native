@@ -18,6 +18,7 @@ import CurrentLocation from "./CurrentLocation";
 import Directions from "./Directions";
 import bbox from "@turf/bbox";
 import RNGooglePlaces from "react-native-google-places";
+import DirectionType from "../Utils/DirectionType";
 
 import RadioForm from "react-native-simple-radio-button";
 import toiletIcon from "../../assets/images/toilet-icon.png";
@@ -45,6 +46,7 @@ const BOUNDS_PADDING_BOTTOM = IS_ANDROID
   ? PixelRatio.getPixelSizeForLayoutSize(206)
   : 206;
 export default class ShowMap extends Component {
+
   constructor(props) {
     super(props);
 
@@ -278,7 +280,6 @@ export default class ShowMap extends Component {
           </MapboxGL.ShapeSource>
           <CurrentLocation
             onLocationChange={this.onLocationChange}
-            {...this.currentLocationStyle}
           />
 
           <Directions
