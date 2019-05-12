@@ -197,6 +197,9 @@ export default class ShowMap extends Component {
     const AddPointResponse = await POI.addPoI(payload);
     console.log(AddPointResponse);
 
+    const getPointResponse = await POI.getPoI();
+    console.log(getPointResponse);
+    
     console.log(newGeoPoint);
     const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
     feature.id = `${Date.now()}`;

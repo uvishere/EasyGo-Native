@@ -5,8 +5,10 @@ import AsyncStorage from "@react-native-community/async-storage";
 
 //API URLS
 const ADDPOI_API = "http://easygo.codeshala.com/point";
-// const LOGIN_API = "http://easygo.codeshala.com/user/login";
+const GETPOI_API = "http://easygo.codeshala.com/point";
 
+
+//Create the Request header object
 const setRequestConfig = token => {
   try {
     const config = {
@@ -33,11 +35,26 @@ class PoIConfig {
       const token = await AsyncStorage.getItem("@userToken");
 
       const config = setRequestConfig(token);
-      const userResponse = await axios.post(ADDPOI_API, req, config);
-      console.log("Response after adding PoI", userResponse.data);
-      return userResponse.data;
+      const poiResponse = await axios.post(ADDPOI_API, req, config);
+      console.log("Response after adding PoI", poiResponse.data);
+      return poiResponse.data;
     } catch (e) {
       console.log(e.message);
+    }
+  };
+
+  // Get All the PoI
+  async getPoI() {
+    try {
+      const token = await AsyncStorage.getItem("@userToken");
+      const config = setRequestConfig(token);
+
+      const poiResponse = await axios.get(GETPOI_API, config);
+      console.log("PoI Data: ", poiResponse.data);
+      
+      return poiResponse.data;
+    } catch (e) {
+      console.log('error in getting points', e.message)
     }
   }
 }
