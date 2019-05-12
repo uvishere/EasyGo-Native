@@ -18,7 +18,7 @@ import CurrentLocation from "./CurrentLocation";
 import Directions from "./Directions";
 import bbox from "@turf/bbox";
 import RNGooglePlaces from "react-native-google-places";
-import DirectionType from "../Utils/DirectionType";
+import POI from '../Utils/AddPoi';
 
 import RadioForm from "react-native-simple-radio-button";
 import toiletIcon from "../../assets/images/toilet-icon.png";
@@ -189,6 +189,17 @@ export default class ShowMap extends Component {
       feature_type: this.state.typeValue,
       description: this.state.barrierDesc
     };
+    const payload = {
+      "pointType": properties.feature_type,
+      "description": properties.description,
+      "location": newGeoPoint.coordinates,
+    };
+    try{ 
+    const AddPointResponse = await POI.addPoI(payload);
+    console.log(AddPointResponse);
+    } catch (e) {
+      console.log('error in adding poi', e)
+    }
     console.log(newGeoPoint);
     const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
     feature.id = `${Date.now()}`;
@@ -397,6 +408,6 @@ const mapStyles = MapboxGL.StyleSheet.create({
   icon: {
     iconImage: toiletIcon,
     iconAllowOverlap: false,
-    iconSize: 1.2
+    iconSize: 0.3,
   }
 });

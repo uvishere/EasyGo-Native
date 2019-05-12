@@ -10,6 +10,7 @@ import LoginScreen from "../Components/SignIn";
 import ShowMap from "../Components/Map";
 import AsyncStorage from "@react-native-community/async-storage";
 
+// AsyncStorage.clear();
 export default class ScreenCollection extends Component {
   constructor(props) {
     super(props);
