@@ -11,6 +11,7 @@ const styles = MapboxGL.StyleSheet.create({
         lineWidth: 5,
         lineCap: MapboxGL.LineCap.Round,
         lineJoin: MapboxGL.LineJoin.Round,
+        lineDasharray: [1, 2],
     },
 });
 
