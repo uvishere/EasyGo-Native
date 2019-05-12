@@ -18,7 +18,7 @@ import CurrentLocation from "./CurrentLocation";
 import Directions from "./Directions";
 import bbox from "@turf/bbox";
 import RNGooglePlaces from "react-native-google-places";
-import POI from '../Utils/AddPoi';
+import POI from "../Utils/PoIConfig";
 
 import RadioForm from "react-native-simple-radio-button";
 import toiletIcon from "../../assets/images/toilet-icon.png";
@@ -46,7 +46,6 @@ const BOUNDS_PADDING_BOTTOM = IS_ANDROID
   ? PixelRatio.getPixelSizeForLayoutSize(206)
   : 206;
 export default class ShowMap extends Component {
-
   constructor(props) {
     super(props);
 
@@ -190,16 +189,14 @@ export default class ShowMap extends Component {
       description: this.state.barrierDesc
     };
     const payload = {
-      "pointType": properties.feature_type,
-      "description": properties.description,
-      "location": newGeoPoint.coordinates,
+      pointType: properties.feature_type,
+      description: properties.description,
+      location: newGeoPoint.coordinates
     };
-    try{ 
+
     const AddPointResponse = await POI.addPoI(payload);
     console.log(AddPointResponse);
-    } catch (e) {
-      console.log('error in adding poi', e)
-    }
+
     console.log(newGeoPoint);
     const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
     feature.id = `${Date.now()}`;
@@ -289,9 +286,7 @@ export default class ShowMap extends Component {
               style={mapStyles.icon}
             />
           </MapboxGL.ShapeSource>
-          <CurrentLocation
-            onLocationChange={this.onLocationChange}
-          />
+          <CurrentLocation onLocationChange={this.onLocationChange} />
 
           <Directions
             accessToken={MAPBOX_ACCESS_TOKEN}
@@ -408,6 +403,6 @@ const mapStyles = MapboxGL.StyleSheet.create({
   icon: {
     iconImage: toiletIcon,
     iconAllowOverlap: false,
-    iconSize: 0.3,
+    iconSize: 0.3
   }
 });
