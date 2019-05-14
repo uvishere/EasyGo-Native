@@ -10,7 +10,7 @@ import {
   Text,
   Rating,
   Button,
-  Header
+  Header, Overlay
 } from "react-native-elements";
 import { Toast } from "native-base";
 import { MaterialDialog } from "react-native-material-dialog";
@@ -20,9 +20,16 @@ import Directions from "./Directions";
 import bbox from "@turf/bbox";
 import RNGooglePlaces from "react-native-google-places";
 import POI from "../Utils/PoIConfig";
+import PoIDetailOverlay from "./PoIDetailOverlay";
 
 import RadioForm from "react-native-simple-radio-button";
-import defaultMarkerIcon from "../../assets/images/default-marker-icon.png";
+// import defaultMarkerIcon from "../../assets/images/default-marker-icon.png";
+import toiletIcon from "../../assets/images/icon-toilet.png";
+import parkingMarkerIcon from "../../assets/images/icon-parking.png";
+import gapsMarkerIcon from "../../assets/images/icon-gap.png";
+import crossingMarkerIcon from "../../assets/images/icon-crossing.png";
+import obstructionsMarkerIcon from "../../assets/images/obstruction.png";
+import pathawaysMarkerIcon from "../../assets/images/icon-pathway.png";
 
 // Define Mapbox Token
 const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
@@ -194,7 +201,8 @@ export default class ShowMap extends Component {
     };
     const properties = {
       feature_type: this.state.typeValue,
-      description: this.state.barrierDesc
+      description: this.state.barrierDesc,
+      icon: this.state.typeValue,
     };
     const payload = {
       pointType: properties.feature_type,
@@ -241,14 +249,14 @@ export default class ShowMap extends Component {
         };
         const properties = {
           feature_type: pointType,
-          description: description
+          description: description,
+          icon: pointType,
+          rating:ratings
         };
     
-        console.log(newGeoPoint);
         const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
         feature.id = `${Date.now()}`;
-        console.log(feature);
-  
+        
         debugger;
         this.setState({
           featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
@@ -284,15 +292,43 @@ export default class ShowMap extends Component {
     this.populateBarriers();
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    // this.getNearest();
   }
 
   onSourceLayerPress(e) {
     const feature = e.nativeEvent.payload;
+    console.log(feature);
+    
     Toast.show({
       text: feature.properties.description,
-      type: "success"
+      type: "success",
+      duration: 5000
     });
+  }
+
+  async getNearest() {
+    const featureCollection = await this.state.featureCollection;
+    const poiSingleCord = featureCollection.features;
+    console.log(poiSingleCord);
+    let PoIArray = [];
+    
+    poiSingleCord.forEach(point => {
+      PoIArray.push(point.geometry.coordinates)
+    });
+
+    console.log(PoIArray);
+  }
+
+  get PoIIcon() {
+    const mapStyles = MapboxGL.StyleSheet.create({
+      icon: {
+        iconImage: defaultMarkerIcon,
+        iconAllowOverlap: false,
+        iconSize: 0.8
+      }
+    })
+    return mapStyles.icon;
   }
 
   //Rendering Main Component
@@ -334,12 +370,13 @@ export default class ShowMap extends Component {
             hitbox={{ width: 44, height: 44 }}
             onPress={this.onSourceLayerPress}
             shape={this.state.featureCollection}
+            images={{toilet:toiletIcon, parking:parkingMarkerIcon}}
           >
             <MapboxGL.SymbolLayer
               id="symbolLocationSymbols"
-              minZoomLevel={11}
+                  minZoomLevel={11}
               style={mapStyles.icon}
-            />
+          />
           </MapboxGL.ShapeSource>
           <CurrentLocation onLocationChange={this.onLocationChange} />
 
@@ -359,7 +396,7 @@ export default class ShowMap extends Component {
             name="ios-add-circle"
             type="ionicon"
             color="#4150E8"
-            size={30}
+            size={25}
             onPress={() => this._toggleModal()}
           />
           <Icon
@@ -368,7 +405,7 @@ export default class ShowMap extends Component {
             name="ios-locate"
             type="ionicon"
             color="#f50"
-            size={30}
+            size={25}
             onPress={() => this.askLocation()}
           />
         </View>
@@ -451,8 +488,8 @@ const styles = StyleSheet.create({
 
 const mapStyles = MapboxGL.StyleSheet.create({
   icon: {
-    iconImage: defaultMarkerIcon,
+    iconImage: '{icon}',
     iconAllowOverlap: false,
-    iconSize: 1
+    iconSize: 1.5
   }
 });
