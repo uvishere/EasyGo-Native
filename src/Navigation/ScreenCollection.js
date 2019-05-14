@@ -4,7 +4,6 @@
  * @flow
  */
 import React, { Component } from "react";
-import { View, StyleSheet } from "react-native";
 import { Router, Scene, Stack } from "react-native-router-flux";
 import LoginScreen from "../Components/SignIn";
 import ShowMap from "../Components/Map";
@@ -52,7 +51,7 @@ export default class ScreenCollection extends Component {
             initial={this.state.isLogin}
             hideNavBar={true}
           />
-          <Scene key="map" initial={this.state.isHome} component={ShowMap} title="Map" hideNavBar={true} back={true} />
+          <Scene key="map" initial={this.state.isHome} component={ShowMap} title="EasyGo- Your Smart Movement Companion" hideNavBar={true} back={true} />
         </Stack>
       </Router>
     );

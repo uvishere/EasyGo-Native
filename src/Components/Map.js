@@ -9,7 +9,8 @@ import {
   Input,
   Text,
   Rating,
-  Button
+  Button,
+  Header
 } from "react-native-elements";
 import { Toast } from "native-base";
 import { MaterialDialog } from "react-native-material-dialog";
@@ -21,7 +22,7 @@ import RNGooglePlaces from "react-native-google-places";
 import POI from "../Utils/PoIConfig";
 
 import RadioForm from "react-native-simple-radio-button";
-import toiletIcon from "../../assets/images/toilet-icon.png";
+import defaultMarkerIcon from "../../assets/images/default-marker-icon.png";
 
 // Define Mapbox Token
 const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
@@ -78,9 +79,10 @@ export default class ShowMap extends Component {
     this.onLocationChange = this.onLocationChange.bind(this);
     this.onDirectionsFetched = this.onDirectionsFetched.bind(this);
     this.openSearchModal = this.openSearchModal.bind(this);
+    this.populateBarriers = this.populateBarriers.bind(this);
   }
 
-  //For Location Search Autocomplete
+  /* For Location Search Autocomplete */
   openSearchModal() {
     RNGooglePlaces.openAutocompleteModal({
       useOverlay: true
@@ -102,26 +104,32 @@ export default class ShowMap extends Component {
       .catch(error => console.log(error.message)); // error is a Javascript Error object
   }
 
+
+  /* Event after the direction is completely fetched from the API */
   onDirectionsFetched(directions) {
     if (!this.state.isChangeFromPress) {
       this.fitBounds(directions);
     }
   }
 
+  /* Fit the generated route to the mobile viewport  */
   fitBounds(directions) {
-    const boundingBox = bbox(
-      MapboxGL.geoUtils.makeFeature(directions.geometry)
-    );
+    try {
+      const boundingBox = bbox(
+        MapboxGL.geoUtils.makeFeature(directions.geometry)
+      );
 
-    console.log("Mapbounds", boundingBox);
-
-    const padding = 20;
-    this._map.fitBounds(
-      [boundingBox[2], boundingBox[3]],
-      [boundingBox[0], boundingBox[1]],
-      padding,
-      500
-    );
+      const padding = 20;
+      this._map.fitBounds(
+        [boundingBox[2], boundingBox[3]],
+        [boundingBox[0], boundingBox[1]],
+        padding,
+        500
+      );
+    }
+    catch (e) {
+      debugger;
+    }
   }
 
   onLocationChange(coord) {
@@ -134,7 +142,7 @@ export default class ShowMap extends Component {
     };
   }
 
-  // Ask for Location Permission **USES MAPBOX API
+  /* Ask for Location Permission **USES MAPBOX API */
   async askLocation() {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     if (isGranted) {
@@ -167,7 +175,7 @@ export default class ShowMap extends Component {
     }
   }
 
-  //Update the userlocation
+  /* Update the userlocation */
   async updateUserLocation(location) {
     this.setState({
       timestamp: location.timestamp,
@@ -195,11 +203,8 @@ export default class ShowMap extends Component {
     };
 
     const AddPointResponse = await POI.addPoI(payload);
-    console.log(AddPointResponse);
+    console.log("added to easygo server", AddPointResponse);
 
-    const getPointResponse = await POI.getPoI();
-    console.log(getPointResponse);
-    
     console.log(newGeoPoint);
     const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
     feature.id = `${Date.now()}`;
@@ -215,29 +220,71 @@ export default class ShowMap extends Component {
     });
   }
 
-  //Update Search Input Value
+  /* Add Barriers on the map load */
+  async populateBarriers() {
+    try {
+      const pointResponse = await POI.getPoI();
+      console.log(pointResponse);
+      
+      pointResponse.data.forEach(point => {
+        console.log(point)
+        const {
+          location,
+          pointType,
+          description,
+          ratings
+        } = point;
+  
+        const newGeoPoint = {
+          coordinates: location.coordinates,
+          type: location.type
+        };
+        const properties = {
+          feature_type: pointType,
+          description: description
+        };
+    
+        console.log(newGeoPoint);
+        const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
+        feature.id = `${Date.now()}`;
+        console.log(feature);
+  
+        debugger;
+        this.setState({
+          featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
+            this.state.featureCollection,
+            feature
+          )
+        });
+      });
+    } catch (e) {
+      debugger;
+      console.log(e)
+    }
+  }
+
+  /* Update Search Input Value */
   updateSearch(value) {
     this.setState({ search: value });
   }
 
-  //Update the Barrier Description Value
+  /* Update the Barrier Description Value */
   updateBarrierDesc(value) {
     this.setState({ barrierDesc: value });
   }
 
-  //set the visibility of Barrier Modal
+  /* set the visibility of Barrier Modal */
   _toggleModal() {
     console.log("is Modal Visible?", this.state.modalVisible);
     this.setState({ modalVisible: !this.state.modalVisible });
   }
 
   async componentWillMount() {
-    //Fetch All the Points here
     this.askLocation();
+    this.populateBarriers();
   }
 
   async componentDidMount() {
-    console.log("ShowMap Component Mounted");
   }
 
   onSourceLayerPress(e) {
@@ -251,18 +298,23 @@ export default class ShowMap extends Component {
   //Rendering Main Component
   render() {
     // Extract the state variables
-    const { centerCoords, search, longitude, latitude, styleURL } = this.state;
+    const { centerCoords, longitude, latitude, styleURL } = this.state;
 
     return (
-      <View style={styles.container}>
-        <SearchBar
-          platform="android"
-          placeholder="Where are you going today..."
-          onChangeText={this.updateSearch}
-          value={this.state.search}
-          containerStyle={styles.searchContainer}
-          round
-          onPress={this.openSearchModal}
+      <View style={styles.mainContainer}>
+        <Header
+          containerStyle={{ marginTop: -25, opacity: 0.8 }}
+          leftComponent={{ icon: "menu", color: "#000" }}
+          centerComponent={{ text: "EasyGo", style: { color: "#fff" } }}
+          rightComponent={
+            <Icon
+              reverse={true}
+              name="search"
+              color="#0A779A"
+              size={20}
+              onPress={() => this.openSearchModal()}
+            />
+          }
         />
 
         <MapboxGL.MapView
@@ -285,7 +337,7 @@ export default class ShowMap extends Component {
           >
             <MapboxGL.SymbolLayer
               id="symbolLocationSymbols"
-              minZoomLevel={1}
+              minZoomLevel={11}
               style={mapStyles.icon}
             />
           </MapboxGL.ShapeSource>
@@ -301,15 +353,6 @@ export default class ShowMap extends Component {
         </MapboxGL.MapView>
 
         <View style={styles.gpsButton}>
-          <Icon
-            raised
-            reverse={true}
-            name="ios-search"
-            type="ionicon"
-            color="#1c9e50"
-            size={30}
-            onPress={() => this.openSearchModal()}
-          />
           <Icon
             raised
             reverse={true}
@@ -377,6 +420,10 @@ export default class ShowMap extends Component {
 
 // Component style definitions
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: "#00AAE1"
+  },
   container: {
     flex: 1,
     backgroundColor: "transparent"
@@ -404,8 +451,8 @@ const styles = StyleSheet.create({
 
 const mapStyles = MapboxGL.StyleSheet.create({
   icon: {
-    iconImage: toiletIcon,
+    iconImage: defaultMarkerIcon,
     iconAllowOverlap: false,
-    iconSize: 0.3
+    iconSize: 1
   }
 });
