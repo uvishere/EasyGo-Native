@@ -135,7 +135,7 @@ export default class ShowMap extends Component {
       );
     }
     catch (e) {
-      debugger;
+      console.log(e)
     }
   }
 
@@ -167,7 +167,9 @@ export default class ShowMap extends Component {
             type: "success"
           });
           this.setState({
-            centerCoords: [longitude, latitude]
+            centerCoords: [longitude, latitude],
+            longitude: longitude,
+            latitude: latitude
           });
         },
         error => {
@@ -257,7 +259,7 @@ export default class ShowMap extends Component {
         const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
         feature.id = `${Date.now()}`;
         
-        debugger;
+        // debugger;
         this.setState({
           featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
             this.state.featureCollection,
@@ -342,15 +344,7 @@ export default class ShowMap extends Component {
           containerStyle={{ marginTop: -25, opacity: 0.8 }}
           leftComponent={{ icon: "menu", color: "#000" }}
           centerComponent={{ text: "EasyGo", style: { color: "#fff" } }}
-          rightComponent={
-            <Icon
-              reverse={true}
-              name="search"
-              color="#0A779A"
-              size={20}
-              onPress={() => this.openSearchModal()}
-            />
-          }
+
         />
 
         <MapboxGL.MapView
@@ -370,7 +364,7 @@ export default class ShowMap extends Component {
             hitbox={{ width: 44, height: 44 }}
             onPress={this.onSourceLayerPress}
             shape={this.state.featureCollection}
-            images={{toilet:toiletIcon, parking:parkingMarkerIcon}}
+            images={{ toilet: toiletIcon, parking: parkingMarkerIcon, gaps:gapsMarkerIcon, crossings: crossingMarkerIcon, pathways: pathawaysMarkerIcon, obstructions: obstructionsMarkerIcon }}
           >
             <MapboxGL.SymbolLayer
               id="symbolLocationSymbols"
@@ -390,6 +384,14 @@ export default class ShowMap extends Component {
         </MapboxGL.MapView>
 
         <View style={styles.gpsButton}>
+        <Icon
+              reverse={true}
+              name="ios-search"
+            type="ionicon"
+            color="#0A779A"
+              size={25}
+              onPress={() => this.openSearchModal()}
+            />
           <Icon
             raised
             reverse={true}

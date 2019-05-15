@@ -126,7 +126,6 @@ export default class LoginScreen extends Component {
     try {
       console.log('You are about to call login api');
       const userResponse = await axios.post(LOGIN_API, userPayload, config);
-      debugger;
       this.setToken(userResponse.data.token)
       
       this.ShowMap(userResponse.data.verifiedUser);
