@@ -15,10 +15,12 @@ import {
   ToastAndroid
 } from "react-native";
 import { Input, Button, Icon } from "react-native-elements";
-import { Actions, ActionConst } from "react-native-router-flux";
+import { Actions } from "react-native-router-flux";
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 import BG_IMAGE from "../../assets/images/eg-login-bg.jpg"
+import { Toast } from "native-base";
+
 // Get the device screen Height and Width
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -38,7 +40,6 @@ const config = {
 
 // Enable LayoutAnimation on Android
 UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
-
 
 const TabSelector = ({ selected }) => {
   return (
@@ -97,46 +98,56 @@ export default class LoginScreen extends Component {
     return re.test(email);
   }
 
-  // Navigation function to display map
-  ShowMap(params) {
-    console.log(ActionConst.RESET)
-    return Actions.reset('map', params);
+  /* Navigation function to display map */
+  async ShowMap(params) {
+    return Actions.map(params);
   }
 
-  //Store the token into AsyncStorage
+  /* Store the token into AsyncStorage */
   async setToken(token) {
     try {
       console.log('you are here')
       await AsyncStorage.setItem('@userToken', token);
       console.log("Key Stored Successfully as UserToken:", token)
+      ToastAndroid.show(token, ToastAndroid.SHORT)
     } catch (err) {
       console.log("error in setting AsyncStorage key", err);
+      ToastAndroid.show(err, ToastAndroid.SHORT)
     }
   }
 
-  // Login using email and password and redirect to the map page
+  /* Login using email and password and redirect to the map page */
   async login() {
+
     const { email, password } = this.state;
     this.setState({ isLoading: true });
-    // Simulate an API call
 
-    //Create the Payload
+    /* Create the Payload */
     const userPayload = { email, password };
 
     try {
-      console.log('You are about to call login api');
+
+      /* Call the Login API */
       const userResponse = await axios.post(LOGIN_API, userPayload, config);
-      this.setToken(userResponse.data.token)
-      
-      this.ShowMap(userResponse.data.verifiedUser);
+      if (!userResponse) {
+        throw err;
+      }
+      await this.setToken(userResponse.data.token);
+
+      debugger;
+      await this.ShowMap(userResponse.data.verifiedUser);
 
     } catch (err) {
-      ToastAndroid.show("Login Attempt Failed, please try again",ToastAndroid.SHORT)
-      console.log(err)
+      Toast.show({
+        text: err,
+        type: "danger",
+        duration: 5000
+      })
+      console.warn(err)
     }
-    
 
-    //Use it later
+
+    /* Loading Buttons */
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
@@ -148,24 +159,29 @@ export default class LoginScreen extends Component {
   }
 
 
-  // Signup using name, email and password and redirect to the map page
+  /* Signup using name, email and password and redirect to the map page */
   async signUp() {
-    const { name, email, password, passwordConfirmation } = this.state;
+    const { name, email, password } = this.state;
     this.setState({ isLoading: true });
 
-    // Simulate an API call
-
-    //Create the Payload
     const userPayload = { name, email, password };
     try {
       const userResponse = await axios.post(SIGNUP_API, userPayload, config);
-      this.setToken(userResponse.data.token)
       
-      // Load Map Screen
-      this.ShowMap(userResponse.data.verifiedUser);
+      this.setToken(userResponse.data.token); /* store the user token in the local storage */
+
+
+      debugger;
+      return this.ShowMap(userResponse.data.verifiedUser);
 
     } catch (err) {
-      console.log(err)
+      Toast.show({
+        text: "An Error Occured!!",
+        type: "danger",
+        duration: 5000
+      });
+      debugger;
+      console.log(err);
     }
 
     setTimeout(() => {
@@ -174,7 +190,7 @@ export default class LoginScreen extends Component {
         isLoading: false,
         isEmailValid: this.validateEmail(email) || this.emailInput.shake(),
         isPasswordValid: password.length >= 8 || this.passwordInput.shake()
-        
+
       });
     }, 1000);
   }

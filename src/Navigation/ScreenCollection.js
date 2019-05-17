@@ -4,12 +4,12 @@
  * @flow
  */
 import React, { Component } from "react";
-import { Router, Scene, Stack } from "react-native-router-flux";
+import { Router, Scene, Stack, ActionConst } from "react-native-router-flux";
 import LoginScreen from "../Components/SignIn";
 import ShowMap from "../Components/Map";
 import AsyncStorage from "@react-native-community/async-storage";
 
-// AsyncStorage.clear();
+AsyncStorage.clear();
 export default class ScreenCollection extends Component {
   constructor(props) {
     super(props);
@@ -22,6 +22,7 @@ export default class ScreenCollection extends Component {
     this.checkLoggedIn = this.checkLoggedIn.bind(this);
   }
 
+  /* Check if the user is logged in or not by checking the stored token */
   async checkLoggedIn() {
     try {
       token = await AsyncStorage.getItem('@userToken')
@@ -51,7 +52,14 @@ export default class ScreenCollection extends Component {
             initial={this.state.isLogin}
             hideNavBar={true}
           />
-          <Scene key="map" initial={this.state.isHome} component={ShowMap} title="EasyGo- Your Smart Movement Companion" hideNavBar={true} back={true} />
+          <Scene key="map"
+            initial={this.state.isHome}
+            component={ShowMap}
+            title="EasyGo- Your Smart Movement Companion"
+            hideNavBar={true}
+            back={true}
+            type={ActionConst.REPLACE}
+          />
         </Stack>
       </Router>
     );
