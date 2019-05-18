@@ -1,7 +1,7 @@
 "use strict";
 
 import React, { Component } from "react";
-import { View, StyleSheet, PixelRatio, Platform } from "react-native";
+import { View, StyleSheet, PixelRatio, Platform, KeyboardAvoidingView } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import {
   Icon,
@@ -93,8 +93,9 @@ export default class ShowMap extends Component {
   /* For Location Search Autocomplete */
   openSearchModal() {
     RNGooglePlaces.openAutocompleteModal({
-      useOverlay: true
-    })
+      useOverlay: true,
+
+    }, ['placeID', 'location', 'name', 'address', 'types'])
       .then(place => {
         console.log(place);
 
@@ -231,33 +232,48 @@ export default class ShowMap extends Component {
     });
   }
 
+
+  /* Filters all the PoI and creates an Array of PoI according to the user preference */
+  filterPoI(fullArray /*, filterOptions */) {
+    let readyPoI = [];
+
+    const toCheck = ['toilet', 'parking']; /*TODO: toCheck variable should be replaced by filterOptions */
+
+    fullArray.data.forEach(point => {
+      if (toCheck.includes(point.pointType)) {
+        readyPoI.push(point)
+      }
+    })
+    return readyPoI;
+  };
+
+
   /* Add Barriers on the map load */
   async populateBarriers() {
     try {
       const pointResponse = await POI.getPoI();
-      
-      pointResponse.data.forEach(point => {
-        const {
-          location,
-          pointType,
-          description,
-          ratings
-        } = point;
-  
+
+      const readyPoI = this.filterPoI(pointResponse);
+      debugger;
+      readyPoI.forEach(point => {
+
+        const { location, pointType, description, ratings } = point;
+        
         const newGeoPoint = {
           coordinates: location.coordinates,
           type: location.type
         };
+        
         const properties = {
           feature_type: pointType,
           description: description,
           icon: pointType,
-          rating:ratings
+          rating: ratings
         };
-    
+
         const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
         feature.id = `${Date.now()}`;
-        
+
         // debugger;
         this.setState({
           featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
@@ -300,7 +316,7 @@ export default class ShowMap extends Component {
   onSourceLayerPress(e) {
     const feature = e.nativeEvent.payload;
     console.log(feature);
-    
+
     Toast.show({
       text: feature.properties.description,
       type: "success",
@@ -313,7 +329,7 @@ export default class ShowMap extends Component {
     const poiSingleCord = featureCollection.features;
     console.log(poiSingleCord);
     let PoIArray = [];
-    
+
     poiSingleCord.forEach(point => {
       PoIArray.push(point.geometry.coordinates)
     });
@@ -338,14 +354,7 @@ export default class ShowMap extends Component {
     const { centerCoords, longitude, latitude, styleURL } = this.state;
 
     return (
-      <View style={styles.mainContainer}>
-        <Header
-          containerStyle={{ marginTop: -25, opacity: 0.8 }}
-          leftComponent={{ icon: "menu", color: "#000" }}
-          centerComponent={{ text: "EasyGo", style: { color: "#fff" } }}
-
-        />
-
+      <KeyboardAvoidingView style={styles.mainContainer}>
         <MapboxGL.MapView
           showUserLocation={true}
           zoomLevel={16}
@@ -363,13 +372,13 @@ export default class ShowMap extends Component {
             hitbox={{ width: 44, height: 44 }}
             onPress={this.onSourceLayerPress}
             shape={this.state.featureCollection}
-            images={{ toilet: toiletIcon, parking: parkingMarkerIcon, gaps:gapsMarkerIcon, crossings: crossingMarkerIcon, pathways: pathawaysMarkerIcon, obstructions: obstructionsMarkerIcon }}
+            images={{ toilet: toiletIcon, parking: parkingMarkerIcon, gaps: gapsMarkerIcon, crossings: crossingMarkerIcon, pathways: pathawaysMarkerIcon, obstructions: obstructionsMarkerIcon }}
           >
             <MapboxGL.SymbolLayer
               id="symbolLocationSymbols"
-                  minZoomLevel={11}
+              minZoomLevel={11}
               style={mapStyles.icon}
-          />
+            />
           </MapboxGL.ShapeSource>
           <CurrentLocation onLocationChange={this.onLocationChange} />
 
@@ -383,14 +392,14 @@ export default class ShowMap extends Component {
         </MapboxGL.MapView>
 
         <View style={styles.gpsButton}>
-        <Icon
-              reverse={true}
-              name="ios-search"
+          <Icon
+            reverse={true}
+            name="ios-search"
             type="ionicon"
             color="#0A779A"
-              size={25}
-              onPress={() => this.openSearchModal()}
-            />
+            size={25}
+            onPress={() => this.openSearchModal()}
+          />
           <Icon
             raised
             reverse={true}
@@ -451,7 +460,7 @@ export default class ShowMap extends Component {
             />
           </View>
         </MaterialDialog>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }
@@ -460,7 +469,7 @@ export default class ShowMap extends Component {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: "#00AAE1"
+    backgroundColor: "transparent"
   },
   container: {
     flex: 1,
