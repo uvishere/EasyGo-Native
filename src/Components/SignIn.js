@@ -1,6 +1,5 @@
 "use strict";
 
-
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import {
@@ -18,8 +17,9 @@ import { Input, Button, Icon } from "react-native-elements";
 import { Actions } from "react-native-router-flux";
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
-import BG_IMAGE from "../../assets/images/eg-login-bg.jpg"
 import { Toast } from "native-base";
+
+import BG_IMAGE from "../../assets/images/eg-login-bg.jpg"
 
 // Get the device screen Height and Width
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -29,14 +29,18 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SIGNUP_API = "http://easygo.codeshala.com/user";
 const LOGIN_API = "http://easygo.codeshala.com/user/login";
 
-// Login Page Background Image
-// const BG_IMAGE = require("../../assets/images/eg-login-bg.jpg");
-
 // Default Axios Configs
+
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
+
 const config = {
-  headers: { 'Content-Type': 'application/json' },
-  responseType: 'json'
+  method: 'post',
+  headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+  responseType: 'json',
+  cancelToken: source.token
 };
+
 
 // Enable LayoutAnimation on Android
 UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -91,6 +95,7 @@ export default class LoginScreen extends Component {
     });
   }
 
+
   // Email Validation
   validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -98,10 +103,13 @@ export default class LoginScreen extends Component {
     return re.test(email);
   }
 
+
   /* Navigation function to display map */
-  async ShowMap(params) {
-    return Actions.map(params);
+  ShowMap(params) {
+    source.cancel('Operation canceled by the user.');
+    Actions.map(params);
   }
+
 
   /* Store the token into AsyncStorage */
   async setToken(token) {
@@ -116,38 +124,53 @@ export default class LoginScreen extends Component {
     }
   }
 
+
   /* Login using email and password and redirect to the map page */
   async login() {
 
     const { email, password } = this.state;
     this.setState({ isLoading: true });
 
-    /* Create the Payload */
     const userPayload = { email, password };
+    console.log(userPayload);
+  /* Call the Login API */
+  
+   try {
 
-    try {
-
-      /* Call the Login API */
-      const userResponse = await axios.post(LOGIN_API, userPayload, config);
-      if (!userResponse) {
-        throw err;
+      const apiResponse = await axios.post(LOGIN_API, userPayload, config);
+      
+      console.log(apiResponse);
+      if (apiResponse.data) {
+        console.log(apiResponse.data);
+        this.setToken(apiResponse.data.token);
+        return this.ShowMap(apiResponse.data.verifiedUser);
       }
-      await this.setToken(userResponse.data.token);
+      else {
+        throw apiResponse;
+      }
 
-      debugger;
-      await this.ShowMap(userResponse.data.verifiedUser);
-
-    } catch (err) {
-      Toast.show({
-        text: err,
-        type: "danger",
-        duration: 5000
-      })
-      console.warn(err)
+    } catch (error) {
+      if (error.response) {
+          Toast.show({
+            text: " Bad Response :( Check your details!",
+            type: 'danger'
+          })
+        } else if (error.request) {
+          Toast.show({
+            text: "Network Request Failed :( Check your network",
+            type: 'danger'
+          })
+        } else {
+          Toast.show({
+            text: "something else happened",
+            type: 'danger'
+          })
+        }
+        console.log(error.config);
     }
 
-
-    /* Loading Buttons */
+    
+  /* Loading Buttons */
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
@@ -156,6 +179,7 @@ export default class LoginScreen extends Component {
         isPasswordValid: password.length >= 8 || this.passwordInput.shake()
       });
     }, 1000);
+
   }
 
 
@@ -167,13 +191,10 @@ export default class LoginScreen extends Component {
     const userPayload = { name, email, password };
     try {
       const userResponse = await axios.post(SIGNUP_API, userPayload, config);
-      
+      const user = userResponse.json();
       this.setToken(userResponse.data.token); /* store the user token in the local storage */
 
-
-      debugger;
       return this.ShowMap(userResponse.data.verifiedUser);
-
     } catch (err) {
       Toast.show({
         text: "An Error Occured!!",
@@ -182,8 +203,9 @@ export default class LoginScreen extends Component {
       });
       debugger;
       console.log(err);
-    }
+    };
 
+    /* Loading Buttons */
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
@@ -194,6 +216,7 @@ export default class LoginScreen extends Component {
       });
     }, 1000);
   }
+
 
   // Main Render
   render() {

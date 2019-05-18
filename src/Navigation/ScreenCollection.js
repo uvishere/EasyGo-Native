@@ -8,8 +8,10 @@ import { Router, Scene, Stack, ActionConst } from "react-native-router-flux";
 import LoginScreen from "../Components/SignIn";
 import ShowMap from "../Components/Map";
 import AsyncStorage from "@react-native-community/async-storage";
+import NetInfo from "@react-native-community/netinfo";
+import { Toast } from "native-base";
 
-AsyncStorage.clear();
+// AsyncStorage.clear();
 export default class ScreenCollection extends Component {
   constructor(props) {
     super(props);
@@ -39,8 +41,26 @@ export default class ScreenCollection extends Component {
     }
   }
 
+  async checkNetworkStatus() {
+    const state = await NetInfo.fetch();
+
+    if (state.type == 'cellular' || 'wifi') {
+      console.log('Network connection available.')
+    }
+    else {
+      Toast.show({
+        text: "Nework error!",
+        type: "danger",
+        duration: 2000
+      })
+    }
+    
+  }
+
+  
   componentWillMount() {
     this.checkLoggedIn();
+    this.checkNetworkStatus();
   }
   render() {
     return (

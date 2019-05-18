@@ -24,7 +24,8 @@ import PoIDetailOverlay from "./PoIDetailOverlay";
 
 import RadioForm from "react-native-simple-radio-button";
 // import defaultMarkerIcon from "../../assets/images/default-marker-icon.png";
-import toiletIcon from "../../assets/images/icon-toilet.png";
+// import toiletIcon from "../../assets/images/icon-toilet.png";
+import toiletIcon from "../../assets/images/toilet-icon-resized.png";
 import parkingMarkerIcon from "../../assets/images/icon-parking.png";
 import gapsMarkerIcon from "../../assets/images/icon-gap.png";
 import crossingMarkerIcon from "../../assets/images/icon-crossing.png";
@@ -234,10 +235,8 @@ export default class ShowMap extends Component {
   async populateBarriers() {
     try {
       const pointResponse = await POI.getPoI();
-      console.log(pointResponse);
       
       pointResponse.data.forEach(point => {
-        console.log(point)
         const {
           location,
           pointType,
@@ -492,6 +491,6 @@ const mapStyles = MapboxGL.StyleSheet.create({
   icon: {
     iconImage: '{icon}',
     iconAllowOverlap: false,
-    iconSize: 1.5
+    iconSize: 1
   }
 });

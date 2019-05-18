@@ -70,3 +70,5 @@ env.json
 
 #Vscode settings
 .vscode
+
+.tempcollections
