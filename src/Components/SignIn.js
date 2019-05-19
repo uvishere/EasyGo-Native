@@ -13,13 +13,13 @@ import {
   KeyboardAvoidingView,
   ToastAndroid
 } from "react-native";
-import { Input, Button, Icon } from "react-native-elements";
+import { Input, Button, Icon } from "react-native-elements"
 import { Actions } from "react-native-router-flux";
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Toast } from "native-base";
 
-import BG_IMAGE from "../../assets/images/eg-login-bg.jpg"
+import BG_IMAGE from "../../assets/images/login_bg_screen-new.jpg"
 
 // Get the device screen Height and Width
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -255,17 +255,6 @@ export default class LoginScreen extends Component {
                     disabled={isLoading}
                     type="clear"
                     activeOpacity={0.5}
-                    titleStyle={[
-                      styles.categoryText,
-                      isSignUpPage && styles.selectedCategoryText
-                    ]}
-                    title={"Launch Map"}
-                    onPress={() => this.ShowMap()}
-                  />
-                  <Button
-                    disabled={isLoading}
-                    type="clear"
-                    activeOpacity={0.5}
                     onPress={() => this.selectCategory(0)}
                     containerStyle={{ flex: 1 }}
                     titleStyle={[
@@ -298,22 +287,22 @@ export default class LoginScreen extends Component {
                         <Icon
                           name="user-o"
                           type="font-awesome"
-                          color="rgba(0, 0, 0, 0.38)"
-                          size={25}
+                          color="#fff"
+                          size={20}
                           style={{ backgroundColor: "transparent" }}
                         />
                       }
+                      labelStyle={{color:'#fff'}}
                       value={name}
                       keyboardAppearance="light"
                       autoFocus={false}
                       autoCapitalize="none"
                       autoCorrect={false}
                       returnKeyType="next"
-                      inputStyle={{ marginLeft: 10 }}
+                      inputStyle={{ marginLeft: 10, color:"#eee" }}
+                      
                       placeholder={"Name"}
-                      containerStyle={{
-                        borderBottomColor: "rgba(0, 0, 0, 0.38)"
-                      }}
+                      inputContainerStyle={styles.inputContainer}
                       ref={input => (this.emailInput = input)}
                       onSubmitEditing={() => this.emailInput.focus()}
                       onChangeText={name => this.setState({ name })}
@@ -329,7 +318,7 @@ export default class LoginScreen extends Component {
                       <Icon
                         name="envelope-o"
                         type="font-awesome"
-                        color="rgba(0, 0, 0, 0.38)"
+                        color="#fff"
                         size={25}
                         style={{ backgroundColor: "transparent" }}
                       />
@@ -341,11 +330,9 @@ export default class LoginScreen extends Component {
                     autoCorrect={false}
                     keyboardType="email-address"
                     returnKeyType="next"
-                    inputStyle={{ marginLeft: 10 }}
+                    inputStyle={styles.inputStyle}
                     placeholder={"Email"}
-                    containerStyle={{
-                      borderBottomColor: "rgba(0, 0, 0, 0.38)"
-                    }}
+                    inputContainerStyle={styles.inputContainer}
                     ref={input => (this.emailInput = input)}
                     onSubmitEditing={() => this.passwordInput.focus()}
                     onChangeText={email => this.setState({ email })}
@@ -358,7 +345,7 @@ export default class LoginScreen extends Component {
                       <Icon
                         name="lock"
                         type="simple-line-icon"
-                        color="rgba(0, 0, 0, 0.38)"
+                        color="#fff"
                         size={25}
                         style={{ backgroundColor: "transparent" }}
                       />
@@ -370,11 +357,9 @@ export default class LoginScreen extends Component {
                     secureTextEntry={true}
                     returnKeyType={isSignUpPage ? "next" : "done"}
                     blurOnSubmit={true}
-                    containerStyle={{
-                      marginTop: 16,
-                      borderBottomColor: "rgba(0, 0, 0, 0.38)"
-                    }}
-                    inputStyle={{ marginLeft: 10 }}
+                    inputContainerStyle={styles.inputContainer}
+                    inputStyle={{ marginLeft: 10, color:"#eee" }}
+                    
                     placeholder={"Password"}
                     ref={input => (this.passwordInput = input)}
                     onSubmitEditing={() =>
@@ -424,7 +409,7 @@ export default class LoginScreen extends Component {
 // Style Definitions
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   rowSelector: {
     height: 20,
@@ -445,7 +430,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 70,
     borderColor: "white",
     backgroundColor: "white",
-    opacity: 0.8,
+    opacity: 0,
   },
   loginContainer: {
     alignItems: "center",
@@ -454,31 +439,33 @@ const styles = StyleSheet.create({
   loginTextButton: {
     fontSize: 16,
     color: "white",
-    fontWeight: "bold"
   },
   loginButton: {
-    backgroundColor: "rgba(232, 147, 142, 1)",
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
     borderRadius: 10,
     height: 50,
-    width: 200
+    width: 200,
+    opacity: 0.9
   },
   titleContainer: {
-    height: 150,
+    height: SCREEN_HEIGHT/3,
     backgroundColor: "transparent",
     justifyContent: "center"
   },
   formContainer: {
-    backgroundColor: "white",
-    width: SCREEN_WIDTH - 30,
+    color: '#fff',
+    backgroundColor: "transparent",
+    width: SCREEN_WIDTH - 100,
     borderRadius: 10,
     paddingTop: 32,
     paddingBottom: 32,
     alignItems: "center",
-    opacity: 0.8
+    opacity: 1
   },
   loginText: {
     fontSize: 16,
-    fontWeight: "bold",
     color: "white"
   },
   bgImage: {
@@ -488,15 +475,15 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   categoryText: {
     textAlign: "center",
     color: "white",
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: "light",
     backgroundColor: "transparent",
-    opacity: 0.54
+    opacity: 0.5,
   },
   selectedCategoryText: {
     opacity: 1
@@ -513,8 +500,11 @@ const styles = StyleSheet.create({
     marginTop: 5
   },
   helpContainer: {
+    bottom:0,
     height: 64,
     alignItems: "center",
     justifyContent: "center"
-  }
+  },
+  inputContainer: { backgroundColor: "transparent", borderBottomWidth: 1, opacity: 0.7, borderRadius: 10, borderColor: '#5ca0d3', marginTop: 15 },
+  inputStyle: { marginLeft: 10, color:"#eee" }
 });

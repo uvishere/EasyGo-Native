@@ -4,15 +4,12 @@ import React, { Component } from "react";
 import { View, StyleSheet, PixelRatio, Platform, KeyboardAvoidingView } from "react-native";
 import MapboxGL from "@mapbox/react-native-mapbox-gl";
 import {
-  Icon,
-  SearchBar,
   Input,
-  Text,
+  Icon,
   Rating,
-  Button,
-  Header, Overlay
+   Overlay
 } from "react-native-elements";
-import { Toast } from "native-base";
+import { Container, Header, Title,  Card, CardItem, Content, Footer, FooterTab, Button, Left, Right, Body, Text, Toast } from "native-base";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
 import CurrentLocation from "./CurrentLocation";
@@ -21,6 +18,7 @@ import bbox from "@turf/bbox";
 import RNGooglePlaces from "react-native-google-places";
 import POI from "../Utils/PoIConfig";
 import PoIDetailOverlay from "./PoIDetailOverlay";
+import InfoCard from "./InforCard";
 
 import RadioForm from "react-native-simple-radio-button";
 // import defaultMarkerIcon from "../../assets/images/default-marker-icon.png";
@@ -166,7 +164,11 @@ export default class ShowMap extends Component {
           console.log(longitude, latitude);
           Toast.show({
             text: "Your Location has been updated",
-            type: "success"
+            type: "success",
+            buttonText: "Okay",
+            position: "top",
+            buttonTextStyle: { color: "#008000" },
+            buttonStyle: { backgroundColor: "#5cb85c" }
           });
           this.setState({
             centerCoords: [longitude, latitude],
@@ -354,7 +356,18 @@ export default class ShowMap extends Component {
     const { centerCoords, longitude, latitude, styleURL } = this.state;
 
     return (
-      <KeyboardAvoidingView style={styles.mainContainer}>
+      <Container>
+        <Header>
+          <Left />
+          <Body>
+            <Title>EasyGo</Title>
+          </Body>
+          <Right>
+          <Button transparent>
+              <Icon name="person-outline" type="ionicons" color="#fff" />
+            </Button>
+            </Right>
+        </Header>
         <MapboxGL.MapView
           showUserLocation={true}
           zoomLevel={16}
@@ -390,35 +403,6 @@ export default class ShowMap extends Component {
             style={this.directionsStyle}
           />
         </MapboxGL.MapView>
-
-        <View style={styles.gpsButton}>
-          <Icon
-            reverse={true}
-            name="ios-search"
-            type="ionicon"
-            color="#0A779A"
-            size={25}
-            onPress={() => this.openSearchModal()}
-          />
-          <Icon
-            raised
-            reverse={true}
-            name="ios-add-circle"
-            type="ionicon"
-            color="#4150E8"
-            size={25}
-            onPress={() => this._toggleModal()}
-          />
-          <Icon
-            raised
-            reverse={true}
-            name="ios-locate"
-            type="ionicon"
-            color="#f50"
-            size={25}
-            onPress={() => this.askLocation()}
-          />
-        </View>
         <MaterialDialog
           title="Add a New Barrier"
           visible={this.state.modalVisible}
@@ -458,14 +442,38 @@ export default class ShowMap extends Component {
               ratingColor={"#000000"}
               startingValue={0.5}
             />
+            
           </View>
+          
         </MaterialDialog>
-      </KeyboardAvoidingView>
+        
+        <Footer >
+        <FooterTab style={{backgroundColor:'#fff'}} >
+            <Button vertical  style={styles.footerButtonStyle} onPress={() => this.openSearchModal()}>
+              <Icon name="search" type="ionicons" color="#de2342" />
+              <Text style={styles.footerTextStyle}>Directions</Text>
+            </Button>
+            <Button vertical style={styles.footerButtonStyle} onPress={() => this._toggleModal()}>
+              <Icon name="add-circle-outline" type="ionicons" color="#2E3F7F"/>
+              <Text style={styles.footerTextStyle}>Add Point</Text>
+            </Button  >
+            <Button vertical style={styles.footerButtonStyle}>
+              <Icon name="send" type="ionicons" color="#00CF91" />
+              <Text style={styles.footerTextStyle}>Near Me</Text>
+            </Button >
+            <Button vertical style={styles.footerButtonStyle} onPress={() => this.askLocation()}>
+              <Icon name="location-on" color="#FFC11E" />
+              <Text style={styles.footerTextStyle}>Locate Me</Text>
+            </Button>
+          </FooterTab>
+        </Footer>
+
+      </Container>
     );
   }
 }
 
-// Component style definitions
+/* Component style definitions */
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
@@ -493,9 +501,18 @@ const styles = StyleSheet.create({
   },
   dialogText: {
     fontSize: 12
+  },
+  footerButtonStyle: {
+    borderRightColor: "#eee",
+    borderRightWidth: 1
+  },
+  footerTextStyle: {
+    color: "#2F3538"
   }
 });
 
+
+/* Map Sytles */
 const mapStyles = MapboxGL.StyleSheet.create({
   icon: {
     iconImage: '{icon}',
