@@ -30,8 +30,6 @@ export default class NearbyPoI extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log(this.props.poi[0]);
-
     this.state = {
       features: this.props.poi,
       sortedFeatures: []
@@ -52,7 +50,6 @@ export default class NearbyPoI extends React.Component {
         readyPoI.push(point)
       }
     })
-    console.log(readyPoI);
 
     return readyPoI;
   };
@@ -75,7 +72,6 @@ export default class NearbyPoI extends React.Component {
 
 
   async componentWillMount() {
-    console.log(this.props);
     await this.makeList(this.props.poi);
   }
 

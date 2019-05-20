@@ -7,9 +7,9 @@ import {
   Input,
   Icon,
   Rating,
-   Overlay
+  Overlay
 } from "react-native-elements";
-import { Container, Header, Title,  Card, CardItem, Content, Footer, FooterTab, Button, Left, Right, Body, Text, Toast } from "native-base";
+import { Container, Header, Title, Card, CardItem, Content, Footer, FooterTab, Button, Left, Right, Body, Text, Toast, Spinner, H2, H3, Form } from "native-base";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
 import CurrentLocation from "./CurrentLocation";
@@ -73,6 +73,7 @@ export default class ShowMap extends Component {
       featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
       origin: null,
       destination: null,
+      loading: false
     };
 
     //Bind the component functions
@@ -89,6 +90,7 @@ export default class ShowMap extends Component {
     this.populateBarriers = this.populateBarriers.bind(this);
     this.getDistancefromCurrentLocation = this.getDistancefromCurrentLocation.bind(this);
     this.updateDestination = this.updateDestination.bind(this);
+    this.refreshMap = this.refreshMap.bind(this);
   }
 
   /* For Location Search Autocomplete */
@@ -98,8 +100,6 @@ export default class ShowMap extends Component {
 
     }, ['placeID', 'location', 'name', 'address', 'types'])
       .then(place => {
-        console.log(place);
-
         Toast.show({
           text: "Address: " + place.address,
           type: "default"
@@ -138,6 +138,7 @@ export default class ShowMap extends Component {
       );
     }
     catch (e) {
+      debugger;
       console.log(e)
     }
   }
@@ -162,9 +163,7 @@ export default class ShowMap extends Component {
       });
       navigator.geolocation.getCurrentPosition(
         position => {
-          console.log("position", position);
           const { longitude, latitude } = position.coords;
-          console.log(longitude, latitude);
           Toast.show({
             text: "Your Location has been updated",
             type: "success",
@@ -182,6 +181,7 @@ export default class ShowMap extends Component {
         },
         error => {
           console.log(error);
+          debugger;
         }
       );
     } else {
@@ -229,7 +229,6 @@ export default class ShowMap extends Component {
     feature.feature_type = this.state.typeValue;
     feature.description = this.state.barrierDesc;
 
-    console.log(feature);
     this.setState({
       featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
         this.state.featureCollection,
@@ -264,7 +263,6 @@ export default class ShowMap extends Component {
       { units: "meters" }
     );
     distance = Math.round(distance * 10) / 10;
-    console.log("Distance from origin: ",distance);
     return distance;
   }
 
@@ -277,17 +275,15 @@ export default class ShowMap extends Component {
       const readyPoI = this.filterPoI(pointResponse);
       readyPoI.forEach(point => {
 
-        console.log(point);
         const { location, pointType, description, ratings } = point;
-        
-        console.log(this.state.origin);
+
         const distanceFromOrigin = this.getDistancefromCurrentLocation(location);
-        
+
         const newGeoPoint = {
           coordinates: location.coordinates,
           type: location.type
         };
-        
+
         const properties = {
           feature_type: pointType,
           description: description,
@@ -296,7 +292,7 @@ export default class ShowMap extends Component {
           rating: ratings
         };
 
-        
+
         const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
         feature.id = `${Date.now()}`;
 
@@ -325,7 +321,6 @@ export default class ShowMap extends Component {
 
   /* set the visibility of Barrier Modal */
   _toggleModal() {
-    console.log("is Modal Visible?", this.state.modalVisible);
     this.setState({ modalVisible: !this.state.modalVisible });
   }
 
@@ -338,28 +333,16 @@ export default class ShowMap extends Component {
     // this.getNearest();
   }
 
+  /* when the mapIcon is pressed */
   onSourceLayerPress(e) {
     const feature = e.nativeEvent.payload;
 
     Toast.show({
-      text: feature.properties.distance,
+      text: feature.properties.description,
       type: "success",
       duration: 5000
     });
-    return(<InfoCard />)
   }
-
-  get PoIIcon() {
-    const mapStyles = MapboxGL.StyleSheet.create({
-      icon: {
-        iconImage: defaultMarkerIcon,
-        iconAllowOverlap: false,
-        iconSize: 0.8
-      }
-    })
-    return mapStyles.icon;
-  }
-
 
 
   /* go to Nearby list */
@@ -367,139 +350,149 @@ export default class ShowMap extends Component {
     const featureCollection = this.state.featureCollection;
     const poiSingleCord = featureCollection.features;
 
-    const params = {poi: poiSingleCord, featureType: "parking", directions: this.updateDestination};
+    const params = { poi: poiSingleCord, featureType: "parking", directions: this.updateDestination };
     Actions.nearby(params);
   }
 
+  /* Update the destination for directions.. Called from child component */
   updateDestination(dest) {
     this.setState({
       destination: dest
     })
   }
 
+  /* Refrest the Map */
+  async refreshMap() {
+    await this.setState({
+      destination: null
+    })
+  }
   //Rendering Main Component
   render() {
     // Extract the state variables
     const { centerCoords, longitude, latitude, styleURL } = this.state;
 
-    return (
-      <Container>
-        <Header>
-          <Left />
-          <Body>
-            <Title>EasyGo</Title>
-          </Body>
-          <Right>
-          <Button transparent>
-              <Icon name="person-outline" type="ionicons" color="#fff" />
-            </Button>
+    if (this.state.loading) {
+      return (
+          <Content>
+            <Spinner color='red' />
+          </Content>
+      );
+    }
+    else {
+      return (
+        <Container>
+          <Header>
+            <Left >
+              <Button transparent onPress={() => alert("create user profile")} >
+                <Icon name="person-outline" type="ionicons" color="#fff" />
+              </Button>
+            </Left>
+            <Body>
+              <Title>EasyGo</Title>
+            </Body>
+            <Right>
+              <Button transparent onPress={() => this.refreshMap()} >
+                <Text></Text>
+                <Icon name="refresh" type="ionicons" color="#fff" />
+              </Button>
             </Right>
-        </Header>
-        <MapboxGL.MapView
-          showUserLocation={true}
-          zoomLevel={16}
-          userTrackingMode={MapboxGL.UserTrackingModes.FollowWithHeading}
-          styleURL={styleURL}
-          centerCoordinate={centerCoords}
-          style={styles.container}
-          ref={c => (this._map = c)}
-          onRegionDidChange={this.getCenter}
-          animated={true}
-          onUserLocationUpdate={this.updateUserLocation}
-        >
-          <MapboxGL.ShapeSource
-            id="symbolLocationSource"
-            hitbox={{ width: 44, height: 44 }}
-            onPress={this.onSourceLayerPress}
-            shape={this.state.featureCollection}
-            images={{ toilet: toiletIcon, parking: parkingMarkerIcon, gaps: gapsMarkerIcon, crossings: crossingMarkerIcon, pathways: pathawaysMarkerIcon, obstructions: obstructionsMarkerIcon }}
+          </Header>
+          <MapboxGL.MapView
+            showUserLocation={true}
+            zoomLevel={16}
+            userTrackingMode={MapboxGL.UserTrackingModes.FollowWithHeading}
+            styleURL={styleURL}
+            centerCoordinate={centerCoords}
+            style={styles.container}
+            ref={c => (this._map = c)}
+            onRegionDidChange={this.getCenter}
+            animated={true}
+            onUserLocationUpdate={this.updateUserLocation}
           >
-            <MapboxGL.SymbolLayer
-              id="symbolLocationSymbols"
-              minZoomLevel={11}
-              style={mapStyles.icon}
-            />
-          </MapboxGL.ShapeSource>
-          <CurrentLocation onLocationChange={this.onLocationChange} />
+            <MapboxGL.ShapeSource
+              id="symbolLocationSource"
+              hitbox={{ width: 44, height: 44 }}
+              onPress={this.onSourceLayerPress}
+              shape={this.state.featureCollection}
+              images={{ toilet: toiletIcon, parking: parkingMarkerIcon, gaps: gapsMarkerIcon, crossings: crossingMarkerIcon, pathways: pathawaysMarkerIcon, obstructions: obstructionsMarkerIcon }}
+            >
+              <MapboxGL.SymbolLayer
+                id="symbolLocationSymbols"
+                minZoomLevel={11}
+                style={mapStyles.icon}
+              />
+            </MapboxGL.ShapeSource>
+            <CurrentLocation onLocationChange={this.onLocationChange} />
 
-          <Directions
-            accessToken={MAPBOX_ACCESS_TOKEN}
-            origin={this.state.origin}
-            destination={this.state.destination}
-            onDirectionsFetched={this.onDirectionsFetched}
-            style={this.directionsStyle}
-          />
-        </MapboxGL.MapView>
-        <MaterialDialog
-          title="Add a New Barrier"
-          visible={this.state.modalVisible}
-          onOk={() => {
-            this.onSubmitBarrier();
-            this.setState({ modalVisible: false });
-          }}
-          onCancel={() => this.setState({ modalVisible: false })}
-        >
-          <View>
-            <Text>Barrier Type</Text>
-            <RadioForm
-              radio_props={type_props}
-              initial={0}
-              onPress={value => {
-                this.setState({ typeValue: value });
-              }}
+            <Directions
+              accessToken={MAPBOX_ACCESS_TOKEN}
+              origin={this.state.origin}
+              destination={this.state.destination}
+              onDirectionsFetched={this.onDirectionsFetched}
+              style={this.directionsStyle}
             />
-            <Text>Co-Ordinates</Text>
-            <Button
-              icon={<Icon name="add-location" size={15} color="white" />}
-              title="Current Location"
-              onPress={this.askLocation}
-            />
-            <Text>
-              {longitude}, {latitude}
-            </Text>
-            <Text> Description</Text>
-            <Input
-              onChangeText={this.updateBarrierDesc}
-              placeholder="Barrier Description"
-            />
+          </MapboxGL.MapView>
+          <MaterialDialog
+            title="Add a New Barrier"
+            visible={this.state.modalVisible}
+            onOk={() => {
+              this.onSubmitBarrier();
+              this.setState({ modalVisible: false });
+            }}
+            onCancel={() => this.setState({ modalVisible: false })}
+          >
+            <Form style={{padding: 25}}>
+              <H3>Barrier Type</H3>
+              <RadioForm
+                radio_props={type_props}
+                initial={0}
+                onPress={value => {
+                  this.setState({ typeValue: value });
+                }}
+                style={{color:"#5cb85c", padding:25}}
+              />
+              <H3>Where</H3>
+              <Button bordered iconLeft success>
+                <Icon name="location-on" type="Ionicons" color="#5cb85c" />
+                <Text>CUrrent Location</Text>
+              </Button>
+                
+              <Text> Description</Text>
+              <Input
+                onChangeText={this.updateBarrierDesc}
+                placeholder="Barrier Description"
+              />
+            </Form>
 
-            <Text>Rating</Text>
-            <Rating
-              style={{ paddingVertical: 10 }}
-              ratingColor={"#000000"}
-              startingValue={0.5}
-            />
-            
-          </View>
-          
-        </MaterialDialog>
-        
-        <Footer >
-        <FooterTab style={{backgroundColor:'#fff'}} >
-            <Button vertical  style={styles.footerButtonStyle} onPress={() => this.openSearchModal()}>
-              <Icon name="search" type="ionicons" color="#de2342" />
-              <Text style={styles.footerTextStyle}>Directions</Text>
-            </Button>
-            <Button vertical style={styles.footerButtonStyle} onPress={() => this._toggleModal()}>
-              <Icon name="add-circle-outline" type="ionicons" color="#2E3F7F"/>
-              <Text style={styles.footerTextStyle}>Add Point</Text>
-            </Button  >
-            <Button vertical style={styles.footerButtonStyle} onPress={() => this.nearbyList()}>
-              <Icon name="send" type="ionicons" color="#00CF91" />
-              <Text style={styles.footerTextStyle} >Near Me</Text>
-            </Button >
-            <Button vertical style={styles.footerButtonStyle} onPress={() => this.askLocation()}>
-              <Icon name="location-on" color="#FFC11E" />
-              <Text style={styles.footerTextStyle}>Locate Me</Text>
-            </Button>
-          </FooterTab>
-        </Footer>
+          </MaterialDialog>
 
-      </Container>
-    );
+          <Footer >
+            <FooterTab style={{ backgroundColor: '#fff' }} >
+              <Button vertical style={styles.footerButtonStyle} onPress={() => this.openSearchModal()}>
+                <Icon name="search" type="ionicons" color="#de2342" />
+                <Text style={styles.footerTextStyle}>Directions</Text>
+              </Button>
+              <Button vertical style={styles.footerButtonStyle} onPress={() => this._toggleModal()}>
+                <Icon name="add-circle-outline" type="ionicons" color="#2E3F7F" />
+                <Text style={styles.footerTextStyle}>Add Point</Text>
+              </Button  >
+              <Button vertical style={styles.footerButtonStyle} onPress={() => this.nearbyList()}>
+                <Icon name="send" type="ionicons" color="#00CF91" />
+                <Text style={styles.footerTextStyle} >Near Me</Text>
+              </Button >
+              <Button vertical style={styles.footerButtonStyle} onPress={() => this.askLocation()}>
+                <Icon name="location-on" color="#FFC11E" />
+                <Text style={styles.footerTextStyle}>Locate Me</Text>
+              </Button>
+            </FooterTab>
+          </Footer>
+
+        </Container>
+      );
+    }
   }
 }
-
 /* Component style definitions */
 const styles = StyleSheet.create({
   mainContainer: {

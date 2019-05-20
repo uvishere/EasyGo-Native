@@ -36,7 +36,6 @@ export default class InfoCard extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props);
   }
 
   sendDirection() {
@@ -45,8 +44,9 @@ export default class InfoCard extends Component {
   }
   render() {
 
-    const { geometry, properties } = this.props.data;
+    const { properties } = this.props.data;
 
+    
     return (
       <Card>
         <CardItem>
