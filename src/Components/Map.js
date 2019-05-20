@@ -9,7 +9,7 @@ import {
   Rating,
   Overlay
 } from "react-native-elements";
-import { Container, Header, Title, Card, CardItem, Content, Footer, FooterTab, Button, Left, Right, Body, Text, Toast, Spinner, H2, H3, Form } from "native-base";
+import { Container, Header, Title, Card, CardItem, Content, Footer, FooterTab, Button, Left, Right, Body, Text, Toast, Spinner, H2, H3, Form, Grid, Col, Row, H1 } from "native-base";
 import { MaterialDialog } from "react-native-material-dialog";
 import config from "../Utils/config";
 import CurrentLocation from "./CurrentLocation";
@@ -73,6 +73,7 @@ export default class ShowMap extends Component {
       featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
       origin: null,
       destination: null,
+      showNearestModal: false,
       loading: false
     };
 
@@ -91,6 +92,7 @@ export default class ShowMap extends Component {
     this.getDistancefromCurrentLocation = this.getDistancefromCurrentLocation.bind(this);
     this.updateDestination = this.updateDestination.bind(this);
     this.refreshMap = this.refreshMap.bind(this);
+    this.OpenNearestOptionModal = this.OpenNearestOptionModal.bind(this);
   }
 
   /* For Location Search Autocomplete */
@@ -153,6 +155,12 @@ export default class ShowMap extends Component {
     };
   }
 
+  /* Open Nearest Options Modal */
+  OpenNearestOptionModal() {
+    this.setState({
+      showNearestModal: !this.state.showNearestModal,
+    })
+  }
   /* Ask for Location Permission **USES MAPBOX API */
   async askLocation() {
     const isGranted = await MapboxGL.requestAndroidLocationPermissions();
@@ -324,6 +332,7 @@ export default class ShowMap extends Component {
     this.setState({ modalVisible: !this.state.modalVisible });
   }
 
+
   async componentWillMount() {
     this.askLocation();
     this.populateBarriers();
@@ -336,21 +345,22 @@ export default class ShowMap extends Component {
   /* when the mapIcon is pressed */
   onSourceLayerPress(e) {
     const feature = e.nativeEvent.payload;
-
+    console.log(feature)
     Toast.show({
       text: feature.properties.description,
       type: "success",
-      duration: 5000
+      duration: 5000,
+      position: "top"
     });
   }
 
 
   /* go to Nearby list */
-  nearbyList() {
+  nearbyList(type) {
     const featureCollection = this.state.featureCollection;
     const poiSingleCord = featureCollection.features;
 
-    const params = { poi: poiSingleCord, featureType: "parking", directions: this.updateDestination };
+    const params = { poi: poiSingleCord, featureType: type, directions: this.updateDestination };
     Actions.nearby(params);
   }
 
@@ -374,9 +384,9 @@ export default class ShowMap extends Component {
 
     if (this.state.loading) {
       return (
-          <Content>
-            <Spinner color='red' />
-          </Content>
+        <Content>
+          <Spinner color='red' />
+        </Content>
       );
     }
     else {
@@ -442,7 +452,7 @@ export default class ShowMap extends Component {
             }}
             onCancel={() => this.setState({ modalVisible: false })}
           >
-            <Form style={{padding: 25}}>
+            <Form style={{ padding: 25 }}>
               <H3>Barrier Type</H3>
               <RadioForm
                 radio_props={type_props}
@@ -450,14 +460,14 @@ export default class ShowMap extends Component {
                 onPress={value => {
                   this.setState({ typeValue: value });
                 }}
-                style={{color:"#5cb85c", padding:25}}
+                style={{ color: "#5cb85c", padding: 25 }}
               />
               <H3>Where</H3>
               <Button bordered iconLeft success>
                 <Icon name="location-on" type="Ionicons" color="#5cb85c" />
                 <Text>CUrrent Location</Text>
               </Button>
-                
+
               <Text> Description</Text>
               <Input
                 onChangeText={this.updateBarrierDesc}
@@ -466,6 +476,74 @@ export default class ShowMap extends Component {
             </Form>
 
           </MaterialDialog>
+
+          <Overlay
+            isVisible={this.state.showNearestModal}
+            onBackdropPress={() => this.setState({ showNearestModal: false })}
+          >
+            <Container style={{ justifyContent: "center", alignItems: "center" }} >
+                <Header transparent>
+                  <H1> Select One</H1>
+                </Header>
+              <Content>
+                <Button success full iconLeft block
+                  style={styles.nearestOverlayContent}
+                  onPress={() => {
+                    this.nearbyList("toilet");
+                    this.setState({ showNearestModal: false });
+                    
+                  }}>
+                  <Icon name="location-on" type="Ionicons" />
+                  <Text>Toilet</Text>
+                </Button>
+                <Button info block full  iconLeft
+                  style={styles.nearestOverlayContent}
+                  onPress={() => {
+                    this.nearbyList("parking");
+                    this.setState({ showNearestModal: false });
+                  }}>
+                  <Icon name="location-on" type="Ionicons" />
+                  <Text>Parking</Text>
+                </Button>
+                <Button danger block full  iconLeft
+                  style={styles.nearestOverlayContent}
+                  onPress={() => {
+                    this.nearbyList("obstructions");
+                    this.setState({ showNearestModal: false });
+                  }}>
+                  <Icon name="location-on" type="Ionicons" />
+                  <Text>Obstruction</Text>
+                </Button>
+                <Button primary block full  iconLeft
+                  style={styles.nearestOverlayContent}
+                  onPress={() => {
+                    this.nearbyList("gaps");
+                    this.setState({ showNearestModal: false });
+                  }}>
+                  <Icon name="location-on" type="Ionicons" />
+                  <Text>Gap</Text>
+                </Button>
+                <Button warning block full  iconLeft
+                  style={styles.nearestOverlayContent}
+                  onPress={() => {
+                    this.nearbyList("crossings");
+                    this.setState({ showNearestModal: false });
+                  }}>
+                  <Icon name="location-on" type="Ionicons" />
+                  <Text>Crossing</Text>
+                </Button>
+                <Button dark block full  iconLeft
+                  style={styles.nearestOverlayContent}
+                  onPress={() => {
+                    this.nearbyList("pathways");
+                    this.setState({ showNearestModal: false });
+                  }}>
+                  <Icon name="location-on" type="Ionicons" />
+                  <Text>Pathway</Text>
+                </Button>
+              </Content>
+            </Container>
+          </Overlay>
 
           <Footer >
             <FooterTab style={{ backgroundColor: '#fff' }} >
@@ -477,7 +555,7 @@ export default class ShowMap extends Component {
                 <Icon name="add-circle-outline" type="ionicons" color="#2E3F7F" />
                 <Text style={styles.footerTextStyle}>Add Point</Text>
               </Button  >
-              <Button vertical style={styles.footerButtonStyle} onPress={() => this.nearbyList()}>
+              <Button vertical style={styles.footerButtonStyle} onPress={() => this.OpenNearestOptionModal()}>
                 <Icon name="send" type="ionicons" color="#00CF91" />
                 <Text style={styles.footerTextStyle} >Near Me</Text>
               </Button >
@@ -528,6 +606,12 @@ const styles = StyleSheet.create({
   },
   footerTextStyle: {
     color: "#2F3538"
+  },
+  nearestOverlayContent:{
+    marginTop: 15,
+    marginBottom: 15,
+    marginLeft: 5,
+    marginRight: 5,
   }
 });
 
