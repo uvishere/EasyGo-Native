@@ -26,7 +26,6 @@ class Directions extends React.Component {
          * Origin coordinate in [longitude, latitude] format
          */
         origin: PropTypes.arrayOf(PropTypes.number),
-
         /**
          * Destination coordinate in [longitude, latitude] format
          */

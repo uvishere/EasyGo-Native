@@ -57,7 +57,6 @@ class CurrentLocation extends React.Component {
       this._locationWatchID = navigator.geolocation.watchPosition(
         this.onLocationChange,
         this.onLocationError,
-        { enableHighAccuracy: true, useSignificantChanges: true },
       );
     } else {
       this.setState({ currentPosition: MapboxGL.geoUtils.makePoint(this.props.mockUserLocation) });

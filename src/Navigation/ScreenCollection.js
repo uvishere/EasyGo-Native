@@ -10,6 +10,7 @@ import ShowMap from "../Components/Map";
 import AsyncStorage from "@react-native-community/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import { Toast } from "native-base";
+import NearbyPoI from "../Components/NearbyPoI";
 
 // AsyncStorage.clear();
 export default class ScreenCollection extends Component {
@@ -79,6 +80,14 @@ export default class ScreenCollection extends Component {
             hideNavBar={true}
             back={true}
             type={ActionConst.REPLACE}
+          />
+          <Scene
+            key="nearby"
+            initial={false}
+            component={NearbyPoI}
+            title="Nearby You"
+            hideNavBar={true}
+            back={true}
           />
         </Stack>
       </Router>

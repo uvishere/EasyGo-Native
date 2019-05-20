@@ -18,7 +18,7 @@ import bbox from "@turf/bbox";
 import RNGooglePlaces from "react-native-google-places";
 import POI from "../Utils/PoIConfig";
 import PoIDetailOverlay from "./PoIDetailOverlay";
-import InfoCard from "./InforCard";
+import InfoCard from "./InfoCard";
 import findDistance from '@turf/distance';
 
 import RadioForm from "react-native-simple-radio-button";
@@ -30,7 +30,7 @@ import gapsMarkerIcon from "../../assets/images/icon-gap.png";
 import crossingMarkerIcon from "../../assets/images/icon-crossing.png";
 import obstructionsMarkerIcon from "../../assets/images/obstruction.png";
 import pathawaysMarkerIcon from "../../assets/images/icon-pathway.png";
-import { Modal } from "react-native-router-flux";
+import { Modal, Actions } from "react-native-router-flux";
 
 // Define Mapbox Token
 const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
@@ -71,9 +71,8 @@ export default class ShowMap extends Component {
       barrierDesc: "",
       pointBarrierVisible: false,
       featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
-      origin: [130.851761, -12.375846],
+      origin: null,
       destination: null,
-      fakeCenter: [130.852454, -12.374835]
     };
 
     //Bind the component functions
@@ -89,6 +88,7 @@ export default class ShowMap extends Component {
     this.openSearchModal = this.openSearchModal.bind(this);
     this.populateBarriers = this.populateBarriers.bind(this);
     this.getDistancefromCurrentLocation = this.getDistancefromCurrentLocation.bind(this);
+    this.updateDestination = this.updateDestination.bind(this);
   }
 
   /* For Location Search Autocomplete */
@@ -175,6 +175,7 @@ export default class ShowMap extends Component {
           });
           this.setState({
             centerCoords: [longitude, latitude],
+            origin: [longitude, latitude],
             longitude: longitude,
             latitude: latitude
           });
@@ -274,7 +275,6 @@ export default class ShowMap extends Component {
       const pointResponse = await POI.getPoI();
 
       const readyPoI = this.filterPoI(pointResponse);
-      debugger;
       readyPoI.forEach(point => {
 
         console.log(point);
@@ -300,7 +300,6 @@ export default class ShowMap extends Component {
         const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
         feature.id = `${Date.now()}`;
 
-        debugger;
         this.setState({
           featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
             this.state.featureCollection,
@@ -350,19 +349,6 @@ export default class ShowMap extends Component {
     return(<InfoCard />)
   }
 
-  async getNearest() {
-    const featureCollection = await this.state.featureCollection;
-    const poiSingleCord = featureCollection.features;
-    console.log(poiSingleCord);
-    let PoIArray = [];
-
-    poiSingleCord.forEach(point => {
-      PoIArray.push(point.geometry.coordinates)
-    });
-
-    console.log(PoIArray);
-  }
-
   get PoIIcon() {
     const mapStyles = MapboxGL.StyleSheet.create({
       icon: {
@@ -372,6 +358,23 @@ export default class ShowMap extends Component {
       }
     })
     return mapStyles.icon;
+  }
+
+
+
+  /* go to Nearby list */
+  nearbyList() {
+    const featureCollection = this.state.featureCollection;
+    const poiSingleCord = featureCollection.features;
+
+    const params = {poi: poiSingleCord, featureType: "parking", directions: this.updateDestination};
+    Actions.nearby(params);
+  }
+
+  updateDestination(dest) {
+    this.setState({
+      destination: dest
+    })
   }
 
   //Rendering Main Component
@@ -481,9 +484,9 @@ export default class ShowMap extends Component {
               <Icon name="add-circle-outline" type="ionicons" color="#2E3F7F"/>
               <Text style={styles.footerTextStyle}>Add Point</Text>
             </Button  >
-            <Button vertical style={styles.footerButtonStyle}>
+            <Button vertical style={styles.footerButtonStyle} onPress={() => this.nearbyList()}>
               <Icon name="send" type="ionicons" color="#00CF91" />
-              <Text style={styles.footerTextStyle}>Near Me</Text>
+              <Text style={styles.footerTextStyle} >Near Me</Text>
             </Button >
             <Button vertical style={styles.footerButtonStyle} onPress={() => this.askLocation()}>
               <Icon name="location-on" color="#FFC11E" />

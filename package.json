@@ -15,6 +15,7 @@
     "appcenter-analytics": "1.13.0",
     "appcenter-crashes": "1.13.0",
     "axios": "^0.18.0",
+    "fast-sort": "^1.5.6",
     "mapbox": "^1.0.0-beta10",
     "native-base": "^2.12.1",
     "npm": "^6.9.0",
