@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-community/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import { Toast } from "native-base";
 
-AsyncStorage.clear();
+// AsyncStorage.clear();
 export default class ScreenCollection extends Component {
   constructor(props) {
     super(props);

@@ -19,6 +19,7 @@ import RNGooglePlaces from "react-native-google-places";
 import POI from "../Utils/PoIConfig";
 import PoIDetailOverlay from "./PoIDetailOverlay";
 import InfoCard from "./InforCard";
+import findDistance from '@turf/distance';
 
 import RadioForm from "react-native-simple-radio-button";
 // import defaultMarkerIcon from "../../assets/images/default-marker-icon.png";
@@ -29,6 +30,7 @@ import gapsMarkerIcon from "../../assets/images/icon-gap.png";
 import crossingMarkerIcon from "../../assets/images/icon-crossing.png";
 import obstructionsMarkerIcon from "../../assets/images/obstruction.png";
 import pathawaysMarkerIcon from "../../assets/images/icon-pathway.png";
+import { Modal } from "react-native-router-flux";
 
 // Define Mapbox Token
 const MAPBOX_ACCESS_TOKEN = config.getMapboxKey();
@@ -86,6 +88,7 @@ export default class ShowMap extends Component {
     this.onDirectionsFetched = this.onDirectionsFetched.bind(this);
     this.openSearchModal = this.openSearchModal.bind(this);
     this.populateBarriers = this.populateBarriers.bind(this);
+    this.getDistancefromCurrentLocation = this.getDistancefromCurrentLocation.bind(this);
   }
 
   /* For Location Search Autocomplete */
@@ -250,6 +253,21 @@ export default class ShowMap extends Component {
   };
 
 
+  /* Get distance of the point from current location */
+  getDistancefromCurrentLocation(dest) {
+    const origin = MapboxGL.geoUtils.makePoint(this.state.origin);
+    const destination = MapboxGL.geoUtils.makePoint(dest.coordinates);
+
+    let distance = findDistance(
+      origin, destination,
+      { units: "meters" }
+    );
+    distance = Math.round(distance * 10) / 10;
+    console.log("Distance from origin: ",distance);
+    return distance;
+  }
+
+
   /* Add Barriers on the map load */
   async populateBarriers() {
     try {
@@ -259,7 +277,11 @@ export default class ShowMap extends Component {
       debugger;
       readyPoI.forEach(point => {
 
+        console.log(point);
         const { location, pointType, description, ratings } = point;
+        
+        console.log(this.state.origin);
+        const distanceFromOrigin = this.getDistancefromCurrentLocation(location);
         
         const newGeoPoint = {
           coordinates: location.coordinates,
@@ -270,13 +292,15 @@ export default class ShowMap extends Component {
           feature_type: pointType,
           description: description,
           icon: pointType,
+          distance: distanceFromOrigin,
           rating: ratings
         };
 
+        
         const feature = MapboxGL.geoUtils.makeFeature(newGeoPoint, properties);
         feature.id = `${Date.now()}`;
 
-        // debugger;
+        debugger;
         this.setState({
           featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
             this.state.featureCollection,
@@ -317,13 +341,13 @@ export default class ShowMap extends Component {
 
   onSourceLayerPress(e) {
     const feature = e.nativeEvent.payload;
-    console.log(feature);
 
     Toast.show({
-      text: feature.properties.description,
+      text: feature.properties.distance,
       type: "success",
       duration: 5000
     });
+    return(<InfoCard />)
   }
 
   async getNearest() {
