@@ -4,8 +4,8 @@ import axios from "axios";
 import AsyncStorage from "@react-native-community/async-storage";
 
 //API URLS
-const ADDPOI_API = "http://easygo.codeshala.com/point";
-const GETPOI_API = "http://easygo.codeshala.com/point";
+const ADDPOI_API = "https://easygo.codeshala.com/point";
+const GETPOI_API = "https://easygo.codeshala.com/point";
 
 
 //Create the Request header object

@@ -26,8 +26,8 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 //API Calls
-const SIGNUP_API = "http://easygo.codeshala.com/user";
-const LOGIN_API = "http://easygo.codeshala.com/user/login";
+const SIGNUP_API = "https://easygo.codeshala.com/user";
+const LOGIN_API = "https://easygo.codeshala.com/user/login";
 
 // Default Axios Configs
 
@@ -133,12 +133,12 @@ export default class LoginScreen extends Component {
 
     const userPayload = { email, password };
     console.log(userPayload);
-  /* Call the Login API */
-  
-   try {
+    /* Call the Login API */
+
+    try {
 
       const apiResponse = await axios.post(LOGIN_API, userPayload, config);
-      
+
       console.log(apiResponse);
       if (apiResponse.data) {
         console.log(apiResponse.data);
@@ -151,26 +151,26 @@ export default class LoginScreen extends Component {
 
     } catch (error) {
       if (error.response) {
-          Toast.show({
-            text: " Bad Response :( Check your details!",
-            type: 'danger'
-          })
-        } else if (error.request) {
-          Toast.show({
-            text: "Network Request Failed :( Check your network",
-            type: 'danger'
-          })
-        } else {
-          Toast.show({
-            text: "something else happened",
-            type: 'danger'
-          })
-        }
-        console.log(error.config);
+        Toast.show({
+          text: " Bad Response :( Check your details!",
+          type: 'danger'
+        })
+      } else if (error.request) {
+        Toast.show({
+          text: "Network Request Failed :( Check your network",
+          type: 'danger'
+        })
+      } else {
+        Toast.show({
+          text: "something else happened",
+          type: 'danger'
+        })
+      }
+      console.log(error.config);
     }
 
-    
-  /* Loading Buttons */
+
+    /* Loading Buttons */
     setTimeout(() => {
       LayoutAnimation.easeInEaseOut();
       this.setState({
@@ -190,20 +190,38 @@ export default class LoginScreen extends Component {
 
     const userPayload = { name, email, password };
     try {
-      const userResponse = await axios.post(SIGNUP_API, userPayload, config);
-      const user = userResponse.json();
-      this.setToken(userResponse.data.token); /* store the user token in the local storage */
 
-      return this.ShowMap(userResponse.data.verifiedUser);
-    } catch (err) {
-      Toast.show({
-        text: "An Error Occured!!",
-        type: "danger",
-        duration: 5000
-      });
-      debugger;
-      console.log(err);
-    };
+      const apiResponse = await axios.post(SIGNUP_API, userPayload, config);
+
+      console.log(apiResponse);
+      if (apiResponse.data) {
+        console.log(apiResponse.data);
+        this.setToken(apiResponse.data.token);
+        return this.ShowMap(apiResponse.data.verifiedUser);
+      }
+      else {
+        throw apiResponse;
+      }
+
+    } catch (error) {
+      if (error.response) {
+        Toast.show({
+          text: " Bad Response :( Check your details!",
+          type: 'danger'
+        })
+      } else if (error.request) {
+        Toast.show({
+          text: "Network Request Failed :( Check your network",
+          type: 'danger'
+        })
+      } else {
+        Toast.show({
+          text: "something else happened",
+          type: 'danger'
+        })
+      }
+      console.log(error.config);
+    }
 
     /* Loading Buttons */
     setTimeout(() => {
@@ -292,15 +310,15 @@ export default class LoginScreen extends Component {
                           style={{ backgroundColor: "transparent" }}
                         />
                       }
-                      labelStyle={{color:'#fff'}}
+                      labelStyle={{ color: '#fff' }}
                       value={name}
                       keyboardAppearance="light"
                       autoFocus={false}
                       autoCapitalize="none"
                       autoCorrect={false}
                       returnKeyType="next"
-                      inputStyle={{ marginLeft: 10, color:"#eee" }}
-                      
+                      inputStyle={{ marginLeft: 10, color: "#eee" }}
+
                       placeholder={"Name"}
                       inputContainerStyle={styles.inputContainer}
                       ref={input => (this.emailInput = input)}
@@ -358,8 +376,8 @@ export default class LoginScreen extends Component {
                     returnKeyType={isSignUpPage ? "next" : "done"}
                     blurOnSubmit={true}
                     inputContainerStyle={styles.inputContainer}
-                    inputStyle={{ marginLeft: 10, color:"#eee" }}
-                    
+                    inputStyle={{ marginLeft: 10, color: "#eee" }}
+
                     placeholder={"Password"}
                     ref={input => (this.passwordInput = input)}
                     onSubmitEditing={() =>
@@ -450,7 +468,7 @@ const styles = StyleSheet.create({
     opacity: 0.9
   },
   titleContainer: {
-    height: SCREEN_HEIGHT/3,
+    height: SCREEN_HEIGHT / 3,
     backgroundColor: "transparent",
     justifyContent: "center"
   },
@@ -500,11 +518,11 @@ const styles = StyleSheet.create({
     marginTop: 5
   },
   helpContainer: {
-    bottom:0,
+    bottom: 0,
     height: 64,
     alignItems: "center",
     justifyContent: "center"
   },
-  inputContainer: { backgroundColor: "transparent", borderBottomWidth: 1, opacity: 0.7, borderRadius: 10, borderColor: '#5ca0d3', marginTop: 15 },
-  inputStyle: { marginLeft: 10, color:"#eee" }
+  inputContainer: { backgroundColor: "transparent", borderBottomWidth: 1, opacity: 0.7, borderRadius: 10, borderColor: '#ddd', marginTop: 15 },
+  inputStyle: { marginLeft: 10, color: "#eee" }
 });

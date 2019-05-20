@@ -239,7 +239,7 @@ export default class ShowMap extends Component {
   filterPoI(fullArray /*, filterOptions */) {
     let readyPoI = [];
 
-    const toCheck = ['toilet', 'parking']; /*TODO: toCheck variable should be replaced by filterOptions */
+    const toCheck = ['toilet', 'parking', 'obstructions', 'pathways', 'crossings', 'gaps']; /*TODO: toCheck variable should be replaced by filterOptions */
 
     fullArray.data.forEach(point => {
       if (toCheck.includes(point.pointType)) {
