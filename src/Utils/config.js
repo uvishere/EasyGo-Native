@@ -1,4 +1,8 @@
-import env from '../../env.json'
+'use strict';
+
+import env from '../../env.json';
+
+console.log(env.mapboxkey)
 
 class Config {
     getMapboxKey() {
